@@ -1,0 +1,73 @@
+@import "tailwindcss";
+
+/* Theme extensions used by the teleadmin pages (from teleadmin_aditya/tailwind.config.js) */
+@theme {
+  --breakpoint-xs: 475px;
+  --animate-pulse-slow: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --spacing-safe-top: env(safe-area-inset-top);
+  --spacing-safe-bottom: env(safe-area-inset-bottom);
+  --spacing-safe-left: env(safe-area-inset-left);
+  --spacing-safe-right: env(safe-area-inset-right);
+}
+
+/* Theme extensions used by the HRMS pages (from hrms_react/tailwind.config.js; the re-mapped stock
+   colour families are scoped to .hrms-scope in src/hrms/hrms.css) */
+@theme {
+  --color-primary-50: #F1F5FB; --color-primary-100: #DFE8F5; --color-primary-200: #C0D0E9; --color-primary-300: #94AED4;
+  --color-primary-400: #6285B7; --color-primary-500: #3E6499; --color-primary-600: #2C4E7E; --color-primary-700: #223D63;
+  --color-primary-800: #1A2E4A; --color-primary-900: #142338; --color-primary-950: #0C1626;
+  --color-brass-50: #FCF8EE; --color-brass-100: #F7EDD4; --color-brass-200: #EFDCA8; --color-brass-300: #E2C374;
+  --color-brass-400: #D2A94A; --color-brass-500: #BC8F32; --color-brass-600: #9C7325; --color-brass-700: #7B591D;
+  --color-brass-800: #5B4217; --color-brass-900: #3D2C10;
+  --font-display: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  --shadow-card: 0 1px 2px 0 rgba(27, 25, 21, 0.04), 0 8px 24px -16px rgba(27, 25, 21, 0.18);
+  --shadow-lift: 0 2px 4px -1px rgba(27, 25, 21, 0.06), 0 18px 32px -14px rgba(27, 25, 21, 0.24);
+  --shadow-rail: 1px 0 0 0 rgba(27, 25, 21, 0.06), 12px 0 32px -24px rgba(27, 25, 21, 0.35);
+  --tracking-eyebrow: 0.14em;
+  --animate-hrms-fade-in: hrms-fadeIn 0.3s ease-in-out;
+  --animate-hrms-slide-up: hrms-slideUp 0.3s ease-out;
+  --animate-hrms-slide-down: hrms-slideDown 0.3s ease-out;
+  --animate-hrms-shimmer: hrms-shimmer 1.6s ease-in-out infinite;
+
+  @keyframes hrms-fadeIn { 0% { opacity: 0; } 100% { opacity: 1; } }
+  @keyframes hrms-slideUp { 0% { transform: translateY(10px); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
+  @keyframes hrms-slideDown { 0% { transform: translateY(-10px); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
+  @keyframes hrms-shimmer { 0% { background-position: -500px 0; } 100% { background-position: 500px 0; } }
+}
+
+@layer base {
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: #F8F9FA;
+    color: #1F2937;
+  }
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Subtle custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #F1F3F5;
+}
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
+/* Page search highlights (see components/PageSearch.jsx) */
+::highlight(page-search) {
+  background-color: #fde68a;
+  color: inherit;
+}
+::highlight(page-search-current) {
+  background-color: #f59e0b;
+  color: #fff;
+}

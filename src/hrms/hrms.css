@@ -1,0 +1,334 @@
+/* TM-Manavsetu HRMS styles (ported from hrms_react/src/index.css + tailwind.config.js), scoped to .hrms-scope.
+   The HRMS re-maps the stock Tailwind families (gray/blue/green/...) to its warm palette; here that is
+   done with the colour variables on .hrms-scope, so only HRMS screens pick it up.
+   primary/brass colours, card/lift/rail shadows and the hrms-* animations live in src/index.css @theme. */
+@reference "../index.css";
+
+.hrms-scope {
+  --color-gray-50: #FAF9F6; --color-gray-100: #F3F1EC; --color-gray-200: #E6E3DB; --color-gray-300: #D3CFC4;
+  --color-gray-400: #A8A296; --color-gray-500: #7B7568; --color-gray-600: #5B564B; --color-gray-700: #454037;
+  --color-gray-800: #2D2A24; --color-gray-900: #1B1915; --color-gray-950: #100F0C;
+
+  --color-blue-50: #F1F5FB; --color-blue-100: #DFE8F5; --color-blue-200: #C0D0E9; --color-blue-300: #94AED4;
+  --color-blue-400: #6285B7; --color-blue-500: #3E6499; --color-blue-600: #2C4E7E; --color-blue-700: #223D63;
+  --color-blue-800: #1A2E4A; --color-blue-900: #142338; --color-blue-950: #0C1626;
+
+  --color-green-50: #F0F7F2; --color-green-100: #DAEDE0; --color-green-200: #B6DAC2; --color-green-300: #86C09B;
+  --color-green-400: #55A175; --color-green-500: #2F8256; --color-green-600: #226845; --color-green-700: #1B5237;
+  --color-green-800: #163F2C; --color-green-900: #112E21;
+
+  --color-emerald-50: #F0F7F2; --color-emerald-100: #DAEDE0; --color-emerald-200: #B6DAC2; --color-emerald-300: #86C09B;
+  --color-emerald-400: #55A175; --color-emerald-500: #2F8256; --color-emerald-600: #226845; --color-emerald-700: #1B5237;
+  --color-emerald-800: #163F2C; --color-emerald-900: #112E21;
+
+  --color-red-50: #FDF3F2; --color-red-100: #FAE2E0; --color-red-200: #F4C5C1; --color-red-300: #E99C96;
+  --color-red-400: #DA6D65; --color-red-500: #C4453C; --color-red-600: #A83128; --color-red-700: #872620;
+  --color-red-800: #661D19; --color-red-900: #4A1512;
+
+  --color-rose-50: #FDF3F2; --color-rose-100: #FAE2E0; --color-rose-200: #F4C5C1; --color-rose-300: #E99C96;
+  --color-rose-400: #DA6D65; --color-rose-500: #C4453C; --color-rose-600: #A83128; --color-rose-700: #872620;
+  --color-rose-800: #661D19; --color-rose-900: #4A1512;
+
+  --color-orange-50: #FDF5EE; --color-orange-100: #FAE8D5; --color-orange-200: #F3CEA6; --color-orange-300: #E9AE6E;
+  --color-orange-400: #DC8C3C; --color-orange-500: #C4711F; --color-orange-600: #A65A18; --color-orange-700: #854714;
+  --color-orange-800: #63350F; --color-orange-900: #45250B;
+
+  --color-amber-50: #FEF9EC; --color-amber-100: #FBEFCC; --color-amber-200: #F6DE9B; --color-amber-300: #EDC55F;
+  --color-amber-400: #DFA92C; --color-amber-500: #C08C1C; --color-amber-600: #9E7016; --color-amber-700: #7E5813;
+  --color-amber-800: #5E420F; --color-amber-900: #422E0B;
+
+  --color-yellow-50: #FEF9EC; --color-yellow-100: #FBEFCC; --color-yellow-200: #F6DE9B; --color-yellow-300: #EDC55F;
+  --color-yellow-400: #DFA92C; --color-yellow-500: #C08C1C; --color-yellow-600: #9E7016; --color-yellow-700: #7E5813;
+  --color-yellow-800: #5E420F; --color-yellow-900: #422E0B;
+
+  --color-purple-50: #F8F5FB; --color-purple-100: #EFE8F6; --color-purple-200: #DDD0EC; --color-purple-300: #C2ACDC;
+  --color-purple-400: #A181C6; --color-purple-500: #825CAC; --color-purple-600: #6A478F; --color-purple-700: #55396F;
+  --color-purple-800: #402B53; --color-purple-900: #2C1D39;
+
+  --color-violet-50: #F8F5FB; --color-violet-100: #EFE8F6; --color-violet-200: #DDD0EC; --color-violet-300: #C2ACDC;
+  --color-violet-400: #A181C6; --color-violet-500: #825CAC; --color-violet-600: #6A478F; --color-violet-700: #55396F;
+  --color-violet-800: #402B53; --color-violet-900: #2C1D39;
+
+  --color-indigo-50: #F2F4FC; --color-indigo-100: #E2E7F8; --color-indigo-200: #C6CFEF; --color-indigo-300: #9EACE0;
+  --color-indigo-400: #7183C7; --color-indigo-500: #4E5FA6; --color-indigo-600: #3C4A86; --color-indigo-700: #303A69;
+  --color-indigo-800: #252C50; --color-indigo-900: #1A1F38;
+
+  --color-teal-50: #F0F7F7; --color-teal-100: #DBEDEC; --color-teal-200: #B5DAD8; --color-teal-300: #83BEBB;
+  --color-teal-400: #519E9B; --color-teal-500: #2F7F7C; --color-teal-600: #226663; --color-teal-700: #1B504E;
+  --color-teal-800: #163E3C; --color-teal-900: #112E2C;
+
+  --radius-xl: 0.875rem;
+  --radius-2xl: 1.125rem;
+  --radius-3xl: 1.5rem;
+  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+
+  --ink-900: #142338;
+  --ink-950: #0C1626;
+  --brass-400: #D2A94A;
+  --brass-500: #BC8F32;
+  --paper: #FAF9F6;
+  --hairline: rgba(27, 25, 21, 0.09);
+  --hairline-strong: rgba(27, 25, 21, 0.14);
+}
+
+/* ------------------------------------------------------------------ *
+ * Base (body rules of the original app apply to the HRMS canvas)
+ * ------------------------------------------------------------------ */
+@layer base {
+  :where(.hrms-scope) {
+    color: var(--color-gray-800);
+    font-family: var(--font-sans);
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'ss01';
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  :where(.hrms-canvas) {
+    background-color: var(--color-slate-50);
+    /* A whisper of warmth in the canvas so white cards read as paper on a desk. */
+    background-image:
+      radial-gradient(1200px 600px at 12% -10%, rgba(44, 78, 126, 0.05), transparent 60%),
+      radial-gradient(900px 500px at 100% 0%, rgba(188, 143, 50, 0.05), transparent 55%);
+  }
+
+  /* Tailwind v3 defaults the HRMS markup relies on: border colour, pointer cursor */
+  :where(.hrms-scope) *, :where(.hrms-scope) ::after, :where(.hrms-scope) ::before,
+  :where(.hrms-scope) ::backdrop, :where(.hrms-scope) ::file-selector-button {
+    border-color: var(--color-gray-200, currentColor);
+  }
+  :where(.hrms-scope) button:not(:disabled), :where(.hrms-scope) [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+
+  /* Every page titles itself with an h1 */
+  :where(.hrms-scope) h1 {
+    font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: #0f172a;
+  }
+
+  :where(.hrms-scope) h2,
+  :where(.hrms-scope) h3 {
+    letter-spacing: -0.015em;
+    color: #1B1915;
+  }
+
+  /* Numerals line up in columns wherever they appear. */
+  :where(.hrms-scope) td,
+  :where(.hrms-scope) th,
+  :where(.hrms-scope) input[type='number'],
+  :where(.hrms-scope) time {
+    font-variant-numeric: tabular-nums;
+  }
+
+  :where(.hrms-scope) :focus-visible {
+    outline: 2px solid var(--brass-400);
+    outline-offset: 2px;
+  }
+
+  :where(.hrms-scope) ::selection {
+    background: rgba(210, 169, 74, 0.28);
+    color: #1B1915;
+  }
+
+  /* Sensible defaults for the many un-styled form controls (element specificity: beats preflight, utilities still win) */
+  :where(.hrms-scope) input:where(:not([type='checkbox']):not([type='radio']):not([type='file'])),
+  :where(.hrms-scope) select,
+  :where(.hrms-scope) textarea {
+    @apply bg-white border-gray-300 text-gray-900 rounded-lg;
+    transition: border-color 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
+  }
+
+  :where(.hrms-scope) input:where(:not([type='checkbox']):not([type='radio']):not([type='file'])):focus,
+  :where(.hrms-scope) select:focus,
+  :where(.hrms-scope) textarea:focus {
+    @apply border-primary-500;
+    box-shadow: 0 0 0 3px rgba(44, 78, 126, 0.12);
+    outline: none;
+  }
+
+  :where(.hrms-scope) input::placeholder,
+  :where(.hrms-scope) textarea::placeholder {
+    @apply text-gray-400;
+  }
+
+  :where(.hrms-scope) input[type='checkbox'],
+  :where(.hrms-scope) input[type='radio'] {
+    accent-color: #2C4E7E;
+  }
+
+  :where(.hrms-scope) hr {
+    @apply border-gray-200;
+  }
+}
+
+/* ------------------------------------------------------------------ *
+ * Components
+ * ------------------------------------------------------------------ */
+@layer components {
+  /* --- Surfaces --- */
+  :where(.hrms-scope) .card,
+  :where(.hrms-scope) .card-interactive {
+    @apply bg-white rounded-2xl border shadow-card;
+    border-color: color-mix(in oklab, var(--color-gray-200) 80%, transparent);
+  }
+
+  :where(.hrms-scope) .card-interactive {
+    @apply transition-all duration-200 hover:shadow-lift hover:-translate-y-0.5 hover:border-gray-300;
+  }
+
+  :where(.hrms-scope) .card-pad {
+    @apply p-5 md:p-6;
+  }
+
+  /* Hairline that carries a brass tick — the app's signature detail. */
+  :where(.hrms-scope) .rule-ornament {
+    @apply relative h-px w-full bg-gray-200;
+  }
+  :where(.hrms-scope) .rule-ornament::after {
+    content: '';
+    @apply absolute left-0 -top-px h-[3px] w-10 rounded-full;
+    background: linear-gradient(90deg, var(--brass-400), rgba(210, 169, 74, 0));
+  }
+
+  /* --- Typography helpers --- */
+  :where(.hrms-scope) .eyebrow {
+    @apply text-[11px] font-semibold uppercase text-gray-500;
+    letter-spacing: 0.14em;
+  }
+
+  :where(.hrms-scope) .panel-title {
+    @apply text-base font-semibold text-slate-900;
+    font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  }
+
+  /* Figures stay in plain Arial — the serif is reserved for titles. */
+  :where(.hrms-scope) .numeral {
+    font-family: Arial, 'Helvetica Neue', Helvetica, ui-sans-serif, sans-serif;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
+  }
+
+  /* --- Buttons --- */
+  :where(.hrms-scope) :is(.btn, .btn-primary, .btn-brass, .btn-secondary, .btn-ghost, .btn-danger) {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium
+           transition-all duration-200 disabled:opacity-55 disabled:cursor-not-allowed;
+  }
+
+  :where(.hrms-scope) .btn-primary {
+    @apply text-white shadow-xs;
+    background-image: linear-gradient(180deg, #35598E 0%, #2C4E7E 100%);
+  }
+  :where(.hrms-scope) .btn-primary:hover:not(:disabled) {
+    background-image: linear-gradient(180deg, #2C4E7E 0%, #223D63 100%);
+    @apply shadow-md;
+  }
+
+  :where(.hrms-scope) .btn-brass {
+    @apply text-primary-950 shadow-xs;
+    background-image: linear-gradient(180deg, #E2C374 0%, #D2A94A 100%);
+  }
+  :where(.hrms-scope) .btn-brass:hover:not(:disabled) {
+    background-image: linear-gradient(180deg, #D2A94A 0%, #BC8F32 100%);
+    @apply shadow-md;
+  }
+
+  :where(.hrms-scope) .btn-secondary {
+    @apply bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 hover:border-gray-400 shadow-2xs;
+  }
+
+  :where(.hrms-scope) .btn-ghost {
+    @apply text-gray-600 hover:bg-gray-100 hover:text-gray-900;
+  }
+
+  :where(.hrms-scope) .btn-danger {
+    @apply bg-red-600 text-white hover:bg-red-700 shadow-xs;
+  }
+
+  :where(.hrms-scope) .btn-sm {
+    @apply px-3 py-1.5 text-xs rounded-md;
+  }
+
+  /* --- Form fields --- */
+  :where(.hrms-scope) .field-label {
+    @apply block text-sm font-medium text-gray-700 mb-1.5;
+  }
+
+  :where(.hrms-scope) .field-input {
+    @apply w-full rounded-lg border border-gray-300 bg-white px-3.5 py-2.5 text-sm text-gray-900
+           placeholder:text-gray-400 transition-all;
+  }
+
+  /* --- Badges --- */
+  :where(.hrms-scope) :is(.badge, .badge-neutral, .badge-success, .badge-warning, .badge-danger, .badge-info, .badge-brass) {
+    @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium;
+  }
+  :where(.hrms-scope) .badge-neutral { @apply bg-gray-100 text-gray-700 ring-1 ring-inset ring-gray-200; }
+  :where(.hrms-scope) .badge-success { @apply bg-green-50 text-green-700 ring-1 ring-inset ring-green-200; }
+  :where(.hrms-scope) .badge-warning { @apply bg-yellow-50 text-yellow-700 ring-1 ring-inset ring-yellow-200; }
+  :where(.hrms-scope) .badge-danger  { @apply bg-red-50 text-red-700 ring-1 ring-inset ring-red-200; }
+  :where(.hrms-scope) .badge-info    { @apply bg-primary-50 text-primary-700 ring-1 ring-inset ring-primary-200; }
+  :where(.hrms-scope) .badge-brass   { @apply bg-brass-50 text-brass-700 ring-1 ring-inset ring-brass-200; }
+
+  /* --- Skeletons --- */
+  :where(.hrms-scope) .skeleton {
+    @apply rounded-md animate-hrms-shimmer;
+    background-color: color-mix(in oklab, var(--color-gray-200) 70%, transparent);
+    background-image: linear-gradient(90deg, rgba(230, 227, 219, 0) 0%, rgba(255, 255, 255, 0.75) 50%, rgba(230, 227, 219, 0) 100%);
+    background-size: 500px 100%;
+    background-repeat: no-repeat;
+  }
+}
+
+/* ------------------------------------------------------------------ *
+ * Utilities
+ * ------------------------------------------------------------------ */
+@layer utilities {
+  :where(.hrms-scope) .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  :where(.hrms-scope) .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  :where(.hrms-scope) .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.18) transparent;
+  }
+  :where(.hrms-scope) .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  :where(.hrms-scope) .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  :where(.hrms-scope) .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.16);
+    border-radius: 999px;
+  }
+  :where(.hrms-scope) .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(210, 169, 74, 0.45);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :where(.hrms-scope) *,
+  :where(.hrms-scope) *::before,
+  :where(.hrms-scope) *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Deep-link target (notification click -> ?highlight=<id>): a brief pulse so the eye finds the row. */
+@keyframes deep-link-flash {
+  0%, 60% { background-color: rgb(219 234 254 / 0.9); box-shadow: inset 4px 0 0 rgb(37 99 235); }
+  100% { background-color: transparent; box-shadow: inset 4px 0 0 transparent; }
+}
+.deep-link-flash {
+  animation: deep-link-flash 3.2s ease-out;
+}
