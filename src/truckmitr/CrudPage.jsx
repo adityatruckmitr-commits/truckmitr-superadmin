@@ -48,6 +48,11 @@ export default function TmCrudPage({ config }) {
     if (data) onData?.(data);
   }, [data]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // form.onChange(values): dependent options, e.g. topics of the chosen module
+  useEffect(() => {
+    if (editing) form?.onChange?.(values);
+  }, [values, editing]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const source = data?.[list.key];
   const allRows = rowsOf(source);
   const rows = query && list.search ? allRows.filter((row) => list.search(row, query.toLowerCase())) : allRows;
@@ -61,8 +66,9 @@ export default function TmCrudPage({ config }) {
     setErrors({});
     setValues(row ? (form.toValues ? form.toValues(row, data) : { ...row }) : { ...(form.defaults || {}) });
     setFormData(null);
-    if (form.load) {
-      tmView(typeof form.load === 'function' ? form.load(row) : form.load)
+    const loadPath = typeof form.load === 'function' ? form.load(row) : form.load;
+    if (loadPath) {
+      tmView(loadPath)
         .then((loaded) => {
           setFormData(loaded);
           if (row && form.toValuesFromLoad) setValues(form.toValuesFromLoad(loaded, row));
@@ -77,7 +83,7 @@ export default function TmCrudPage({ config }) {
     setSaving(true);
     setErrors({});
     try {
-      const payload = form.prepare ? form.prepare(values, row) : values;
+      const payload = form.prepare ? await form.prepare(values, row) : values;
       const result = await tmSend(typeof target.path === 'function' ? target.path(row) : target.path, payload, target.method || 'post');
       notify.success(result?.message || 'Saved successfully');
       setEditing(null);
@@ -209,7 +215,12 @@ export default function TmCrudPage({ config }) {
           startIndex={pager ? pager.from || 1 : 1}
           minWidth={list.minWidth}
         />
-        <TmPager pager={pager} onPage={setPage} />
+        <TmPager
+          pager={pager}
+          onPage={setPage}
+          perPage={filterValues.per_page}
+          onPerPage={(n) => { setFilterValues((prev) => ({ ...prev, per_page: n })); setPage(1); }}
+        />
       </TmSection>
       {config.below?.(ctx)}
 

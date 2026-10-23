@@ -1,3 +1,4 @@
+import PageJump from '../../components/PageJump';
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import leadsApi from '../services/api/leadsApi';
@@ -571,6 +572,7 @@ const LeadsAssignment = () => {
               >
                 <ChevronRight className="w-3.5 h-3.5" />
               </button>
+              <PageJump page={pagination.current_page} totalPages={pagination.last_page} onGo={(n) => setSearchParams((p) => ({ ...p, page: n }))} />
             </div>
           </div>
         )}

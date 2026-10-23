@@ -386,7 +386,7 @@ export default function TeleadminDashboard({ onNavigateTab }) {
                   <User className="w-3 h-3 text-slate-400" /> Today Drivers
                 </span>
                 <span className="font-bold text-slate-800 font-mono">
-                  {dashboardData?.kpis?.drivers?.today?.toLocaleString() || '125'}
+                  {dashboardData?.kpis?.drivers?.today?.toLocaleString() || '0'}
                 </span>
               </div>
               <div className="flex justify-between items-center text-slate-600">
@@ -394,7 +394,7 @@ export default function TeleadminDashboard({ onNavigateTab }) {
                   <Phone className="w-3 h-3 text-orange-400" /> Today Called Drivers
                 </span>
                 <span className="font-bold text-orange-600 font-mono">
-                  {dashboardData?.kpis?.drivers?.called_today?.toLocaleString() || '65'}
+                  {dashboardData?.kpis?.drivers?.called_today?.toLocaleString() || '0'}
                 </span>
               </div>
               <div className="flex justify-between items-center text-slate-600">
@@ -402,7 +402,7 @@ export default function TeleadminDashboard({ onNavigateTab }) {
                   <CheckCircle2 className="w-3 h-3 text-slate-400" /> Today Subscribed
                 </span>
                 <span className="font-bold text-slate-800 font-mono">
-                  {dashboardData?.kpis?.drivers?.subscribed_today?.toLocaleString() || '3'}
+                  {dashboardData?.kpis?.drivers?.subscribed_today?.toLocaleString() || '0'}
                 </span>
               </div>
               <div className="pt-2 border-t border-slate-100 flex justify-between items-center text-slate-600">
@@ -410,7 +410,7 @@ export default function TeleadminDashboard({ onNavigateTab }) {
                   <Users className="w-3 h-3 text-blue-500" /> Total Drivers
                 </span>
                 <span className="font-extrabold text-slate-900 font-mono text-sm">
-                  {dashboardData?.kpis?.drivers?.total?.toLocaleString() || '81,370'}
+                  {dashboardData?.kpis?.drivers?.total?.toLocaleString() || '0'}
                 </span>
               </div>
             </div>
@@ -443,7 +443,7 @@ export default function TeleadminDashboard({ onNavigateTab }) {
                   <User className="w-3 h-3 text-slate-400" /> Today Transporters
                 </span>
                 <span className="font-bold text-slate-800 font-mono">
-                  {dashboardData?.kpis?.transporters?.today?.toLocaleString() || '8'}
+                  {dashboardData?.kpis?.transporters?.today?.toLocaleString() || '0'}
                 </span>
               </div>
               <div className="flex justify-between items-center text-slate-600">
@@ -451,7 +451,7 @@ export default function TeleadminDashboard({ onNavigateTab }) {
                   <Phone className="w-3 h-3 text-orange-400" /> Today Called Transporters
                 </span>
                 <span className="font-bold text-orange-600 font-mono">
-                  {dashboardData?.kpis?.transporters?.called_today?.toLocaleString() || '8'}
+                  {dashboardData?.kpis?.transporters?.called_today?.toLocaleString() || '0'}
                 </span>
               </div>
               <div className="flex justify-between items-center text-slate-600">
@@ -459,7 +459,7 @@ export default function TeleadminDashboard({ onNavigateTab }) {
                   <CheckCircle2 className="w-3 h-3 text-slate-400" /> Today Subscribed
                 </span>
                 <span className="font-bold text-slate-800 font-mono">
-                  {dashboardData?.kpis?.transporters?.subscribed_today?.toLocaleString() || '3'}
+                  {dashboardData?.kpis?.transporters?.subscribed_today?.toLocaleString() || '0'}
                 </span>
               </div>
               <div className="pt-2 border-t border-slate-100 flex justify-between items-center text-slate-600">
@@ -467,7 +467,7 @@ export default function TeleadminDashboard({ onNavigateTab }) {
                   <Building2 className="w-3 h-3 text-amber-500" /> Total Transporters
                 </span>
                 <span className="font-extrabold text-slate-900 font-mono text-sm">
-                  {dashboardData?.kpis?.transporters?.total?.toLocaleString() || '23,693'}
+                  {dashboardData?.kpis?.transporters?.total?.toLocaleString() || '0'}
                 </span>
               </div>
             </div>
@@ -500,7 +500,7 @@ export default function TeleadminDashboard({ onNavigateTab }) {
                   <User className="w-3 h-3 text-slate-400" /> Today Foremen
                 </span>
                 <span className="font-bold text-slate-800 font-mono">
-                  {dashboardData?.kpis?.foremen?.today?.toLocaleString() || '5'}
+                  {dashboardData?.kpis?.foremen?.today?.toLocaleString() || '0'}
                 </span>
               </div>
               <div className="flex justify-between items-center text-slate-600">
@@ -508,7 +508,7 @@ export default function TeleadminDashboard({ onNavigateTab }) {
                   <Phone className="w-3 h-3 text-orange-400" /> Today Called Foremen
                 </span>
                 <span className="font-bold text-orange-600 font-mono">
-                  {dashboardData?.kpis?.foremen?.called_today?.toLocaleString() || '2'}
+                  {dashboardData?.kpis?.foremen?.called_today?.toLocaleString() || '0'}
                 </span>
               </div>
               <div className="flex justify-between items-center text-slate-600">
@@ -524,7 +524,7 @@ export default function TeleadminDashboard({ onNavigateTab }) {
                   <ShieldCheck className="w-3 h-3 text-purple-500" /> Total Foremen
                 </span>
                 <span className="font-extrabold text-slate-900 font-mono text-sm">
-                  {dashboardData?.kpis?.foremen?.total?.toLocaleString() || '2,321'}
+                  {dashboardData?.kpis?.foremen?.total?.toLocaleString() || '0'}
                 </span>
               </div>
             </div>

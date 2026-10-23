@@ -1,3 +1,4 @@
+import PageJump from '../../components/PageJump';
 import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useSearchParams, useNavigate } from '@teleadmin/router';
@@ -305,6 +306,7 @@ const RegisteredUsersDetail = () => {
               >
                 Next
               </button>
+              <PageJump page={page} totalPages={totalPages} onGo={setPage} />
             </div>
           </div>
         )}

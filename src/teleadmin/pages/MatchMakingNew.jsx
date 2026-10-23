@@ -1,3 +1,4 @@
+import PageJump from '../../components/PageJump';
 import { useState, useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import html2canvas from 'html2canvas';
@@ -844,6 +845,7 @@ const MatchMakingNew = () => {
               >
                 <ChevronRight className="w-3.5 h-3.5" />
               </button>
+              <PageJump page={pagination.current_page} totalPages={pagination.last_page} onGo={(n) => setSearchParams((p) => ({ ...p, page: n }))} />
             </div>
           </div>
         )}

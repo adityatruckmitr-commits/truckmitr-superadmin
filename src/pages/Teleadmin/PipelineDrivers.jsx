@@ -98,7 +98,7 @@ export default function PipelineDrivers() {
             statusCode: d.status_code,
             experience: '8 Years',
             route: d.job_location || 'North-South Transport Corridor',
-            offeredSalary: d.salary || '₹28,500 / month',
+            offeredSalary: d.salary || '—',
             notes: d.status_code === 2 
               ? 'Driver placed with fleet operator. Onboarding documentation verified.' 
               : 'Driver cleared telephonic driving evaluation. Final documentation verification pending.'
@@ -180,7 +180,7 @@ export default function PipelineDrivers() {
                   Hiring Pipeline Dashboard
                 </h2>
                 <span className="bg-indigo-100 text-indigo-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-indigo-200">
-                  {totalRecords || pipelineStats.total_matched || 513} ACTIVE
+                  {totalRecords || pipelineStats.total_matched || 0} ACTIVE
                 </span>
               </div>
               <p className="text-xs text-slate-500 flex items-center space-x-1.5 mt-0.5">
@@ -214,7 +214,7 @@ export default function PipelineDrivers() {
           <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex items-center justify-between">
             <div>
               <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Total Matched</div>
-              <div className="text-xl font-bold text-slate-900 mt-0.5">{pipelineStats.total_matched || 513}</div>
+              <div className="text-xl font-bold text-slate-900 mt-0.5">{pipelineStats.total_matched || 0}</div>
             </div>
             <div className="w-9 h-9 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold">
               <Filter className="w-4 h-4" />
@@ -224,7 +224,7 @@ export default function PipelineDrivers() {
           <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex items-center justify-between">
             <div>
               <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Interview Done</div>
-              <div className="text-xl font-bold text-indigo-600 mt-0.5">{pipelineStats.interview_done || 342}</div>
+              <div className="text-xl font-bold text-indigo-600 mt-0.5">{pipelineStats.interview_done || 0}</div>
             </div>
             <div className="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
               <UserCheck className="w-4 h-4" />
@@ -234,7 +234,7 @@ export default function PipelineDrivers() {
           <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex items-center justify-between">
             <div>
               <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Placed Drivers</div>
-              <div className="text-xl font-bold text-emerald-600 mt-0.5">{pipelineStats.placed_drivers || 171}</div>
+              <div className="text-xl font-bold text-emerald-600 mt-0.5">{pipelineStats.placed_drivers || 0}</div>
             </div>
             <div className="w-9 h-9 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center font-bold">
               <CreditCard className="w-4 h-4" />
@@ -244,7 +244,7 @@ export default function PipelineDrivers() {
           <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex items-center justify-between">
             <div>
               <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Reporting This Week</div>
-              <div className="text-xl font-bold text-amber-600 mt-0.5">{pipelineStats.reporting_this_week || 84}</div>
+              <div className="text-xl font-bold text-amber-600 mt-0.5">{pipelineStats.reporting_this_week || 0}</div>
             </div>
             <div className="w-9 h-9 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center font-bold">
               <Clock className="w-4 h-4" />
@@ -272,7 +272,7 @@ export default function PipelineDrivers() {
               <span className={`text-[10px] px-1.5 py-0.2 rounded font-bold ${
                 activeTab === 'interview_done' ? 'bg-indigo-200 text-indigo-800' : 'bg-slate-100 text-slate-600'
               }`}>
-                {pipelineStats.interview_done || 342}
+                {pipelineStats.interview_done || 0}
               </span>
             </button>
 
@@ -292,7 +292,7 @@ export default function PipelineDrivers() {
               <span className={`text-[10px] px-1.5 py-0.2 rounded font-bold ${
                 activeTab === 'placed_drivers' ? 'bg-indigo-200 text-indigo-800' : 'bg-slate-100 text-slate-600'
               }`}>
-                {pipelineStats.placed_drivers || 171}
+                {pipelineStats.placed_drivers || 0}
               </span>
             </button>
           </div>

@@ -1,3 +1,4 @@
+import PageJump from '../../components/PageJump';
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import leadsApi from '../services/api/leadsApi';
@@ -267,6 +268,7 @@ const DriverHireFormLeads = () => {
               >
                 <ChevronRight className="w-4 h-4" />
               </button>
+              <PageJump page={searchParams.page} totalPages={totalPages} onGo={handlePageChange} />
             </div>
           </div>
         )}

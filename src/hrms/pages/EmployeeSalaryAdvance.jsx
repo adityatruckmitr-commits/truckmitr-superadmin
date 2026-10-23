@@ -1,3 +1,4 @@
+import PageJump from '../../components/PageJump';
 import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import toast from 'react-hot-toast'
@@ -584,6 +585,7 @@ export default function EmployeeSalaryAdvance() {
                     <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={safeCurrentPage === totalPages} className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-100 disabled:opacity-30 transition-colors">
                       <ChevronRight className="h-4 w-4" />
                     </button>
+                    <PageJump page={safeCurrentPage} totalPages={totalPages} onGo={setCurrentPage} />
                   </div>
                 )}
               </div>

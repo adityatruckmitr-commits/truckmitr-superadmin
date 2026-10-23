@@ -1,3 +1,4 @@
+import PageJump from '../../../components/PageJump';
 import { useMemo, useState } from 'react'
 import { AlertTriangle, CheckCircle2, Download, Eye, Search } from 'lucide-react-teleadmin'
 import toast from 'react-hot-toast'
@@ -73,6 +74,7 @@ export const Pagination = ({ f }) => (
       <span className="px-2 font-medium text-gray-700">{f.page} / {f.pages}</span>
       <button onClick={() => f.setPage(Math.min(f.pages, f.page + 1))} disabled={f.page === f.pages}
         className="h-7 w-7 rounded-sm border border-gray-200 font-bold text-gray-600 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40">›</button>
+        <PageJump page={f.page} totalPages={f.pages} onGo={f.setPage} />
     </div>
   </div>
 )

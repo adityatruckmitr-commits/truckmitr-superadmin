@@ -1,3 +1,4 @@
+import PageJump from '../../components/PageJump';
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import jobMatchingApi from '../services/api/jobMatchingApi';
@@ -1279,6 +1280,7 @@ const JobMatching = () => {
                 Next
                 <ChevronRight className="w-4 h-4" />
               </button>
+              <PageJump page={currentPage} totalPages={lastPage} onGo={setCurrentPage} />
             </div>
           </div>
         )}

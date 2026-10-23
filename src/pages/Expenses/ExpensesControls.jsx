@@ -25,8 +25,12 @@ import {
   ChevronDown,
   FileCheck,
   AlertCircle,
-  RefreshCw
+  RefreshCw,
+  Pencil
 } from 'lucide-react';
+
+// Expense APIs need the console login: Deepak adds expenses, Anil approves (backend API\ExpenseController)
+const authHeaders = () => ({ Authorization: `Bearer ${localStorage.getItem('token') || ''}` });
 
 export default function ExpensesControls() {
   // Controls state
@@ -38,9 +42,13 @@ export default function ExpensesControls() {
   const [tableTimeRange, setTableTimeRange] = useState('Last 30 Days');
   const [toastMessage, setToastMessage] = useState('');
   const [loading, setLoading] = useState(false);
+  // Who is viewing: can_create (Deepak) shows Add Expense, can_approve (Anil) shows Approve / Reject / Delete
+  const [viewer, setViewer] = useState({ can_create: false, can_approve: false });
 
   // Modals state
   const [isAddExpenseModalOpen, setIsAddExpenseModalOpen] = useState(false);
+  // id of the expense being edited in the same form (approvers only); null = adding a new one
+  const [editingId, setEditingId] = useState(null);
   const [selectedAttentionItem, setSelectedAttentionItem] = useState(null);
 
   const showToast = (msg) => {
@@ -48,33 +56,17 @@ export default function ExpensesControls() {
     setTimeout(() => setToastMessage(''), 3500);
   };
 
-  // KPI Metrics State (populated from API with live baseline defaults)
-  const [kpis, setKpis] = useState({
-    total_expenses: '₹4.82L',
-    total_change: '↓ 4.2% vs budget cap',
-    tech_spend: '₹1.84L',
-    tech_pct: '38% of total',
-    mktg_spend: '₹1.45L',
-    mktg_pct: '30% of total',
-    admin_spend: '₹1.53L',
-    admin_pct: '32% of total',
-    budget_variance: '+12.4%',
-    variance_status: 'healthy buffer',
-    is_budget_positive: true,
-    pending_count: 3,
-    pending_amount: '₹14,500',
-  });
+  // Nothing is shown until the server sends it: no sample figures
+  const EMPTY_KPIS = {
+    total_expenses: '₹0', total_change: '—', tech_spend: '₹0', tech_pct: '—', mktg_spend: '₹0', mktg_pct: '—',
+    admin_spend: '₹0', admin_pct: '—', budget_variance: '—', variance_status: '—', is_budget_positive: true,
+    pending_count: 0, pending_amount: '₹0',
+  };
+  const [kpis, setKpis] = useState(EMPTY_KPIS);
 
   // Summary State
-  const [summaryData, setSummaryData] = useState({
-    total_expenses: '₹24.8L',
-    growth_label: '↑ 12%',
-    growth_pct: 12,
-    budget: '₹36.5L',
-    budget_used_pct: 68,
-    avg_expense_per_txn: '₹16,400',
-    total_transactions: 18,
-  });
+  const EMPTY_SUMMARY = { total_expenses: '₹0', growth_label: '—', growth_pct: 0, budget: '₹0', budget_used_pct: 0, avg_expense_per_txn: '₹0', total_transactions: 0 };
+  const [summaryData, setSummaryData] = useState(EMPTY_SUMMARY);
 
   // New expense form state
   const [newExpenseForm, setNewExpenseForm] = useState({
@@ -90,154 +82,26 @@ export default function ExpensesControls() {
   });
 
   // Recent Expenses Dataset
-  const [expenses, setExpenses] = useState([
-    {
-      id: 1,
-      date: '29 Apr 2025',
-      department: 'Operations',
-      category: 'Field Activity',
-      paidBy: 'Company Card',
-      amount: 12500,
-      billStatus: 'Uploaded',
-      approvalStatus: 'Approved'
-    },
-    {
-      id: 2,
-      date: '28 Apr 2025',
-      department: 'Marketing',
-      category: 'Marketing',
-      paidBy: 'Rohit Sharma',
-      amount: 8400,
-      billStatus: 'Missing Document',
-      approvalStatus: 'Pending'
-    },
-    {
-      id: 3,
-      date: '27 Apr 2025',
-      department: 'People & HR',
-      category: 'Reimbursements',
-      paidBy: 'Priya Verma',
-      amount: 6250,
-      billStatus: 'Uploaded',
-      approvalStatus: 'Pending'
-    },
-    {
-      id: 4,
-      date: '26 Apr 2025',
-      department: 'Operations',
-      category: 'Travel',
-      paidBy: 'Company Card',
-      amount: 11800,
-      billStatus: 'Uploaded',
-      approvalStatus: 'Approved'
-    },
-    {
-      id: 5,
-      date: '25 Apr 2025',
-      department: 'Admin',
-      category: 'Office Rent',
-      paidBy: 'Bank Transfer',
-      amount: 50000,
-      billStatus: 'Uploaded',
-      approvalStatus: 'Approved'
-    },
-    {
-      id: 6,
-      date: '24 Apr 2025',
-      department: 'Technology',
-      category: 'Software',
-      paidBy: 'Company Card',
-      amount: 24000,
-      billStatus: 'Uploaded',
-      approvalStatus: 'Approved'
-    },
-    {
-      id: 7,
-      date: '23 Apr 2025',
-      department: 'Operations',
-      category: 'Field Activity',
-      paidBy: 'Amit Yadav',
-      amount: 7340,
-      billStatus: 'Missing Document',
-      approvalStatus: 'Pending'
-    },
-    {
-      id: 8,
-      date: '22 Apr 2025',
-      department: 'Marketing',
-      category: 'Miscellaneous',
-      paidBy: 'Company Card',
-      amount: 3990,
-      billStatus: 'Uploaded',
-      approvalStatus: 'Approved'
-    }
-  ]);
+  const [expenses, setExpenses] = useState([]);
 
   // Categories Breakdown Data
-  const [categoryBreakdown, setCategoryBreakdown] = useState([
-    { label: 'IVR & Cloud Infrastructure', amount: '₹1,84,000', percentage: 38, color: '#2563EB' },
-    { label: 'Marketing & Ground Campaigns', amount: '₹1,45,000', percentage: 30, color: '#10B981' },
-    { label: 'Field Agent Travel & DA', amount: '₹82,000', percentage: 17, color: '#F59E0B' },
-    { label: 'Office Rent & Utilities', amount: '₹48,000', percentage: 10, color: '#8B5CF6' },
-    { label: 'Software Licenses & Subscriptions', amount: '₹23,000', percentage: 5, color: '#F43F5E' }
-  ]);
+  const [categoryBreakdown, setCategoryBreakdown] = useState([]);
 
   // Month-end Control Checklist
-  const [controlChecklist, setControlChecklist] = useState([
-    {
-      id: 'fin',
-      title: 'Finance Closure',
-      description: 'Reconcile expenses, payments & accruals',
-      status: 'Completed',
-      statusType: 'success'
-    },
-    {
-      id: 'hr',
-      title: 'HR Closure',
-      description: 'Employee reimbursements & settlements',
-      status: '70% In Progress',
-      statusType: 'warning'
-    },
-    {
-      id: 'ops',
-      title: 'Operations Closure',
-      description: 'Field expenses, fuel cards & trip settlements',
-      status: 'Completed',
-      statusType: 'success'
-    },
-    {
-      id: 'comp',
-      title: 'Compliance Closure',
-      description: 'Statutory, policy & audit checks',
-      status: 'Pending (3)',
-      statusType: 'danger'
-    }
-  ]);
+  const [controlChecklist, setControlChecklist] = useState([]);
 
   // Attention Required items
-  const [attentionItems, setAttentionItems] = useState([
-    { id: 'missing_docs', label: 'Expenses without documents', count: 12, filterType: 'missing' },
-    { id: 'overdue_bills', label: 'Bills overdue (> 7 days)', count: 5, filterType: 'all' },
-    { id: 'reimburse_pending', label: 'Reimbursements pending approval', count: 4, filterType: 'pending' },
-    { id: 'month_end_overdue', label: 'Month-end closure items overdue', count: 6, filterType: 'all' },
-    { id: 'policy_violations', label: 'Policy violations (needs review)', count: 2, filterType: 'all' },
-    { id: 'unusual_expenses', label: 'Unusual expenses (high value)', count: 3, filterType: 'all' }
-  ]);
+  const [attentionItems, setAttentionItems] = useState([]);
 
   // Department spend breakdown
-  const [departmentSpend, setDepartmentSpend] = useState([
-    { name: 'Operations', amount: '₹8.6L', percentage: 35, barWidth: '35%' },
-    { name: 'Marketing', amount: '₹4.8L', percentage: 19, barWidth: '19%' },
-    { name: 'People & HR', amount: '₹3.9L', percentage: 16, barWidth: '16%' },
-    { name: 'Admin', amount: '₹3.1L', percentage: 13, barWidth: '13%' },
-    { name: 'Technology', amount: '₹2.6L', percentage: 10, barWidth: '10%' }
-  ]);
+  const [departmentSpend, setDepartmentSpend] = useState([]);
 
   // Fetch Live Expenses Data from Laravel API
   const fetchExpenses = async () => {
     try {
       setLoading(true);
-      const res = await api.get('/admin/expenses', {
+      const res = await api.get('/admin/expenses-controls/data', {
+        headers: authHeaders(),
         params: {
           dateRange: tableTimeRange || dateRange,
           locationScope: selectedRegion,
@@ -247,7 +111,8 @@ export default function ExpensesControls() {
       });
       if (res.data && res.data.status === 'success' && res.data.data) {
         const d = res.data.data;
-        if (Array.isArray(d.recentExpenses) && d.recentExpenses.length > 0) {
+        setViewer({ can_create: false, can_approve: false, ...(d.viewer || {}) });
+        if (Array.isArray(d.recentExpenses)) {
           setExpenses(d.recentExpenses.map(item => ({
             id: item.id,
             date: item.date,
@@ -258,11 +123,13 @@ export default function ExpensesControls() {
             billStatus: item.bill_status === 'Document Uploaded' ? 'Uploaded' : item.bill_status,
             approvalStatus: item.approval_status,
             vendorName: item.vendor_name,
+            rawDate: item.raw_date,
+            paymentMode: item.payment_mode,
             notes: item.notes,
             receiptUrl: item.bill_receipt_url
           })));
         }
-        if (Array.isArray(d.categories) && d.categories.length > 0) {
+        if (Array.isArray(d.categories)) {
           setCategoryBreakdown(d.categories.map(c => ({
             label: c.name,
             amount: c.amount,
@@ -270,7 +137,7 @@ export default function ExpensesControls() {
             color: c.color
           })));
         }
-        if (Array.isArray(d.checklist) && d.checklist.length > 0) {
+        if (Array.isArray(d.checklist)) {
           setControlChecklist(d.checklist.map(chk => ({
             id: chk.id,
             title: chk.title,
@@ -279,7 +146,7 @@ export default function ExpensesControls() {
             statusType: chk.status === 'Completed' ? 'success' : (chk.status === 'In Progress' ? 'warning' : 'danger')
           })));
         }
-        if (Array.isArray(d.attention) && d.attention.length > 0) {
+        if (Array.isArray(d.attention)) {
           setAttentionItems(d.attention.map((a, i) => ({
             id: `att_${i}`,
             label: a.title,
@@ -287,7 +154,7 @@ export default function ExpensesControls() {
             filterType: a.title.includes('document') ? 'missing' : (a.title.includes('pending') ? 'pending' : 'all')
           })));
         }
-        if (Array.isArray(d.departmentSpend) && d.departmentSpend.length > 0) {
+        if (Array.isArray(d.departmentSpend)) {
           setDepartmentSpend(d.departmentSpend.map(dep => ({
             name: dep.department,
             amount: dep.amount,
@@ -295,17 +162,11 @@ export default function ExpensesControls() {
             barWidth: `${dep.percentage}%`
           })));
         }
-        if (d.expenseSummary) {
-          setSummaryData({
-            total_expenses: d.expenseSummary.total_expenses || '₹4.82L',
-            growth_label: d.expenseSummary.growth_label || '↑ 12%',
-            growth_pct: d.expenseSummary.growth_pct || 12,
-            budget: d.expenseSummary.budget || '₹36.5L',
-            budget_used_pct: d.expenseSummary.budget_used_pct || 68,
-            avg_expense_per_txn: d.expenseSummary.avg_expense_per_txn || '₹16,400',
-            total_transactions: d.expenseSummary.total_transactions || (d.recentExpenses ? d.recentExpenses.length : 0),
-          });
-        }
+        setSummaryData({
+          ...EMPTY_SUMMARY,
+          ...(d.expenseSummary || {}),
+          total_transactions: d.expenseSummary?.total_transactions ?? (d.recentExpenses ? d.recentExpenses.length : 0),
+        });
         if (Array.isArray(d.kpis) && d.kpis.length >= 6) {
           setKpis({
             total_expenses: d.kpis[0].value,
@@ -346,10 +207,7 @@ export default function ExpensesControls() {
   // Handle Approve Status
   const handleApproveExpense = async (id) => {
     try {
-      const res = await api.post(`/admin/expenses/${id}/status`, {
-        approval_status: 'Approved',
-        user_email: 'sachin.gupta@truckmitr.com'
-      });
+      const res = await api.patch(`/admin/expenses/${id}/status`, { approval_status: 'Approved' }, { headers: authHeaders() });
       showToast(res.data?.message || 'Expense approved successfully!');
       setExpenses(prev => prev.map(e => e.id === id ? { ...e, approvalStatus: 'Approved' } : e));
       fetchExpenses();
@@ -361,10 +219,7 @@ export default function ExpensesControls() {
   // Handle Reject Status
   const handleRejectExpense = async (id) => {
     try {
-      const res = await api.post(`/admin/expenses/${id}/status`, {
-        approval_status: 'Rejected',
-        user_email: 'sachin.gupta@truckmitr.com'
-      });
+      const res = await api.patch(`/admin/expenses/${id}/status`, { approval_status: 'Rejected' }, { headers: authHeaders() });
       showToast(res.data?.message || 'Expense rejected.');
       setExpenses(prev => prev.map(e => e.id === id ? { ...e, approvalStatus: 'Rejected' } : e));
       fetchExpenses();
@@ -377,9 +232,7 @@ export default function ExpensesControls() {
   const handleDeleteExpense = async (id) => {
     if (!window.confirm('Are you sure you want to delete this expense record?')) return;
     try {
-      const res = await api.delete(`/admin/expenses/${id}`, {
-        data: { user_email: 'sachin.gupta@truckmitr.com' }
-      });
+      const res = await api.delete(`/admin/expenses/${id}`, { headers: authHeaders() });
       showToast(res.data?.message || 'Expense deleted successfully!');
       setExpenses(prev => prev.filter(e => e.id !== id));
       fetchExpenses();
@@ -400,6 +253,23 @@ export default function ExpensesControls() {
     });
   }, [expenses, filterMissingBillsOnly, searchTableQuery]);
 
+  // Open the expense form filled with an existing expense (approvers edit any field, receipt or status)
+  const openEditExpense = (exp) => {
+    setNewExpenseForm({
+      department: exp.department,
+      category: exp.category,
+      paidBy: exp.paidBy,
+      amount: String(exp.amount ?? ''),
+      date: exp.rawDate || new Date().toISOString().split('T')[0],
+      billStatus: exp.billStatus === 'Uploaded' ? 'Uploaded' : 'Missing Document',
+      approvalStatus: exp.approvalStatus || 'Pending',
+      notes: exp.notes || '',
+      receiptFile: null
+    });
+    setEditingId(exp.id);
+    setIsAddExpenseModalOpen(true);
+  };
+
   // Handle Add Expense
   const handleAddExpenseSubmit = async (e) => {
     e.preventDefault();
@@ -418,12 +288,16 @@ export default function ExpensesControls() {
     }
 
     try {
-      const res = await api.post('/admin/expenses', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
+      if (editingId) formData.append('approval_status', newExpenseForm.approvalStatus);
+      const res = await api.post(editingId ? `/admin/expenses/${editingId}/update` : '/admin/expenses', formData, {
+        headers: { ...authHeaders(), 'Content-Type': 'multipart/form-data' }
       });
       if (res.data && res.data.status === 'success') {
-        showToast(`Expense of ₹${parseFloat(newExpenseForm.amount).toLocaleString('en-IN')} recorded successfully.`);
+        showToast(editingId
+          ? res.data.message || 'Expense updated.'
+          : `Expense of ₹${parseFloat(newExpenseForm.amount).toLocaleString('en-IN')} recorded successfully.`);
         setIsAddExpenseModalOpen(false);
+        setEditingId(null);
         fetchExpenses();
         setNewExpenseForm({
           department: 'Operations',
@@ -439,35 +313,10 @@ export default function ExpensesControls() {
         return;
       }
     } catch (err) {
-      console.warn('API error saving expense:', err);
+      showToast(err.response?.data?.message || 'Could not save the expense');
+      return;
     }
-
-    // Local fallback
-    const newEntry = {
-      id: Date.now(),
-      date: new Date(newExpenseForm.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
-      department: newExpenseForm.department,
-      category: newExpenseForm.category,
-      paidBy: newExpenseForm.paidBy,
-      amount: parseFloat(newExpenseForm.amount) || 0,
-      billStatus: newExpenseForm.billStatus,
-      approvalStatus: 'Pending'
-    };
-
-    setExpenses([newEntry, ...expenses]);
-    setIsAddExpenseModalOpen(false);
-    showToast(`Expense of ₹${newEntry.amount.toLocaleString('en-IN')} added successfully.`);
-    setNewExpenseForm({
-      department: 'Operations',
-      category: 'Field Activity',
-      paidBy: 'Company Card',
-      amount: '',
-      date: new Date().toISOString().split('T')[0],
-      billStatus: 'Uploaded',
-      approvalStatus: 'Approved',
-      notes: '',
-      receiptFile: null
-    });
+    showToast('Could not save the expense');
   };
 
   // Export Snapshot Handler
@@ -513,7 +362,7 @@ export default function ExpensesControls() {
             {/* Date Range Selector */}
             <div className="flex items-center space-x-2 bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-700 font-medium">
               <Calendar className="w-3.5 h-3.5 text-slate-400" />
-              <span>{dateRange}</span>
+              <span>{tableTimeRange}</span>
               <ChevronDown className="w-3.5 h-3.5 text-slate-400 ml-1" />
             </div>
 
@@ -606,14 +455,24 @@ export default function ExpensesControls() {
               <span>{filterMissingBillsOnly ? 'Clear Missing Bills Filter' : 'Filter Missing Bills'}</span>
             </button>
 
-            {/* + Add Expense Button */}
-            <button
-              onClick={() => setIsAddExpenseModalOpen(true)}
+            {/* + Add Expense Button (expense creators only) */}
+            {viewer.can_create && <button
+              onClick={() => { setEditingId(null); setNewExpenseForm({
+                  department: 'Operations',
+                  category: 'Field Activity',
+                  paidBy: 'Company Card',
+                  amount: '',
+                  date: new Date().toISOString().split('T')[0],
+                  billStatus: 'Uploaded',
+                  approvalStatus: 'Approved',
+                  notes: '',
+                  receiptFile: null
+                }); setIsAddExpenseModalOpen(true); }}
               className="flex items-center space-x-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-sm transition-colors cursor-pointer"
             >
               <Plus className="w-4 h-4" />
               <span>Add Expense</span>
-            </button>
+            </button>}
           </div>
         </div>
 
@@ -745,7 +604,7 @@ export default function ExpensesControls() {
                 <div>
                   <h3 className="font-bold text-slate-900 text-sm">Expense Breakdown by Category</h3>
                   <p className="text-[11px] text-slate-500 mt-0.5">
-                    Total Expenses: ₹24.8L | vs. last month <span className="text-rose-500 font-bold">↑ 12%</span>
+                    Total Expenses: {summaryData.total_expenses} | vs. last month <span className="text-rose-500 font-bold">{summaryData.growth_label}</span>
                   </p>
                 </div>
                 <select className="bg-slate-50 border border-slate-200 text-slate-700 text-xs px-2 py-1 rounded-md focus:outline-none">
@@ -762,65 +621,28 @@ export default function ExpensesControls() {
                   <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
                     {/* Background Circle */}
                     <circle cx="50" cy="50" r="38" fill="transparent" stroke="#F1F5F9" strokeWidth="16" />
-                    
-                    {/* Segment 1: IVR & Cloud 38% */}
-                    <circle
-                      cx="50"
-                      cy="50"
-                      r="38"
-                      fill="transparent"
-                      stroke="#2563EB"
-                      strokeWidth="16"
-                      strokeDasharray="90.7 238.7"
-                      strokeDashoffset="0"
-                    />
-                    {/* Segment 2: Marketing 30% */}
-                    <circle
-                      cx="50"
-                      cy="50"
-                      r="38"
-                      fill="transparent"
-                      stroke="#10B981"
-                      strokeWidth="16"
-                      strokeDasharray="71.6 238.7"
-                      strokeDashoffset="-90.7"
-                    />
-                    {/* Segment 3: Travel 17% */}
-                    <circle
-                      cx="50"
-                      cy="50"
-                      r="38"
-                      fill="transparent"
-                      stroke="#F59E0B"
-                      strokeWidth="16"
-                      strokeDasharray="40.5 238.7"
-                      strokeDashoffset="-162.3"
-                    />
-                    {/* Segment 4: Rent 10% */}
-                    <circle
-                      cx="50"
-                      cy="50"
-                      r="38"
-                      fill="transparent"
-                      stroke="#8B5CF6"
-                      strokeWidth="16"
-                      strokeDasharray="23.8 238.7"
-                      strokeDashoffset="-202.8"
-                    />
-                    {/* Segment 5: Software 5% */}
-                    <circle
-                      cx="50"
-                      cy="50"
-                      r="38"
-                      fill="transparent"
-                      stroke="#F43F5E"
-                      strokeWidth="16"
-                      strokeDasharray="12 238.7"
-                      strokeDashoffset="-226.6"
-                    />
+                    {/* One segment per category, sized by its share (circumference 2πr = 238.76) */}
+                    {categoryBreakdown.reduce((acc, item) => {
+                      const length = (Number(item.percentage) || 0) * 2.3876;
+                      acc.nodes.push(
+                        <circle
+                          key={item.label}
+                          cx="50"
+                          cy="50"
+                          r="38"
+                          fill="transparent"
+                          stroke={item.color}
+                          strokeWidth="16"
+                          strokeDasharray={`${length} 238.76`}
+                          strokeDashoffset={-acc.offset}
+                        />
+                      );
+                      acc.offset += length;
+                      return acc;
+                    }, { nodes: [], offset: 0 }).nodes}
                   </svg>
                   <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                    <span className="text-base font-black text-slate-900 leading-none">₹24.8L</span>
+                    <span className="text-base font-black text-slate-900 leading-none">{summaryData.total_expenses}</span>
                     <span className="text-[10px] text-slate-400 font-semibold mt-0.5">Total</span>
                   </div>
                 </div>
@@ -896,7 +718,7 @@ export default function ExpensesControls() {
                   <h3 className="font-bold text-slate-900 text-sm">Attention Required</h3>
                 </div>
                 <span className="px-2 py-0.5 bg-rose-50 text-rose-700 border border-rose-200 text-xs font-bold rounded-full">
-                  18 items
+                  {attentionItems.reduce((sum, item) => sum + (Number(item.count) || 0), 0)} items
                 </span>
               </div>
 
@@ -1065,7 +887,16 @@ export default function ExpensesControls() {
                           </span>
                         </td>
                         <td className="py-3 px-4 whitespace-nowrap text-right space-x-1.5">
-                          {exp.approvalStatus !== 'Approved' && (
+                          {viewer.can_approve && (
+                            <button
+                              onClick={() => openEditExpense(exp)}
+                              className="p-1 hover:bg-blue-50 text-slate-400 hover:text-blue-600 rounded cursor-pointer inline-flex items-center transition-colors"
+                              title="Edit Expense"
+                            >
+                              <Pencil className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                          {viewer.can_approve && exp.approvalStatus !== 'Approved' && (
                             <button
                               onClick={() => handleApproveExpense(exp.id)}
                               className="px-2 py-0.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded text-[10px] font-bold cursor-pointer transition-colors"
@@ -1074,7 +905,7 @@ export default function ExpensesControls() {
                               Approve
                             </button>
                           )}
-                          {exp.approvalStatus !== 'Rejected' && (
+                          {viewer.can_approve && exp.approvalStatus !== 'Rejected' && (
                             <button
                               onClick={() => handleRejectExpense(exp.id)}
                               className="px-2 py-0.5 bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 rounded text-[10px] font-bold cursor-pointer transition-colors"
@@ -1083,13 +914,16 @@ export default function ExpensesControls() {
                               Reject
                             </button>
                           )}
-                          <button
+                          {viewer.can_approve && <button
                             onClick={() => handleDeleteExpense(exp.id)}
                             className="p-1 hover:bg-rose-50 text-slate-400 hover:text-rose-600 rounded cursor-pointer inline-flex items-center transition-colors"
                             title="Delete Expense"
                           >
                             <X className="w-3.5 h-3.5" />
-                          </button>
+                          </button>}
+                          {!viewer.can_approve && exp.approvalStatus === 'Pending' && (
+                            <span className="text-[10px] text-slate-400 font-medium">Awaiting Anil's approval</span>
+                          )}
                         </td>
                       </tr>
                     ))}
@@ -1123,34 +957,32 @@ export default function ExpensesControls() {
                 <div className="py-2.5 flex items-center justify-between">
                   <span className="text-slate-500 font-medium">Total Expenses</span>
                   <div className="font-bold text-slate-900 flex items-center space-x-1">
-                    <span>₹24.8L</span>
-                    <span className="text-rose-500 text-[11px] font-bold">↑ 12%</span>
+                    <span>{summaryData.total_expenses}</span>
+                    <span className="text-rose-500 text-[11px] font-bold">{summaryData.growth_label}</span>
                   </div>
                 </div>
 
                 <div className="py-2.5 flex items-center justify-between">
                   <span className="text-slate-500 font-medium">Budget</span>
-                  <span className="font-bold text-slate-900">₹36.5L</span>
+                  <span className="font-bold text-slate-900">{summaryData.budget}</span>
                 </div>
 
                 <div className="py-2.5 flex items-center justify-between">
                   <span className="text-slate-500 font-medium">Budget Used</span>
                   <div className="font-bold text-emerald-600 flex items-center space-x-1">
-                    <span>68%</span>
-                    <span className="text-[11px] font-medium">+ 6%</span>
+                    <span>{summaryData.budget_used_pct}%</span>
                   </div>
                 </div>
 
                 <div className="py-2.5 flex items-center justify-between">
                   <span className="text-slate-500 font-medium">Avg. Expense / Txn</span>
-                  <span className="font-bold text-slate-900">₹8,450</span>
+                  <span className="font-bold text-slate-900">{summaryData.avg_expense_per_txn}</span>
                 </div>
 
                 <div className="py-2.5 flex items-center justify-between">
                   <span className="text-slate-500 font-medium">Total Transactions</span>
                   <div className="font-bold text-blue-600 flex items-center space-x-1">
-                    <span>294</span>
-                    <span className="text-[11px] font-medium">↑ 6%</span>
+                    <span>{summaryData.total_transactions}</span>
                   </div>
                 </div>
               </div>
@@ -1203,12 +1035,12 @@ export default function ExpensesControls() {
                   <CreditCard className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-slate-900">Record New Expense</h3>
-                  <p className="text-xs text-slate-500">Add operational expenditure or reimbursements</p>
+                  <h3 className="text-base font-bold text-slate-900">{editingId ? 'Edit Expense' : 'Record New Expense'}</h3>
+                  <p className="text-xs text-slate-500">{editingId ? 'Change the details, receipt or approval of this expense' : 'Add operational expenditure or reimbursements'}</p>
                 </div>
               </div>
               <button
-                onClick={() => setIsAddExpenseModalOpen(false)}
+                onClick={() => { setIsAddExpenseModalOpen(false); setEditingId(null); }}
                 className="text-slate-400 hover:text-slate-600 p-1 rounded-lg"
               >
                 <X className="w-5 h-5" />
@@ -1314,6 +1146,21 @@ export default function ExpensesControls() {
               )}
 
 
+              {editingId && (
+                <div>
+                  <label className="block text-slate-600 font-medium mb-1">Approval Status</label>
+                  <select
+                    value={newExpenseForm.approvalStatus}
+                    onChange={(e) => setNewExpenseForm({ ...newExpenseForm, approvalStatus: e.target.value })}
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  >
+                    <option value="Pending">Pending</option>
+                    <option value="Approved">Approved</option>
+                    <option value="Rejected">Rejected</option>
+                  </select>
+                </div>
+              )}
+
               <div>
                 <label className="block text-slate-600 font-medium mb-1">Notes / Business Purpose</label>
                 <textarea
@@ -1328,7 +1175,7 @@ export default function ExpensesControls() {
               <div className="flex justify-end space-x-2 pt-3 border-t border-slate-100">
                 <button
                   type="button"
-                  onClick={() => setIsAddExpenseModalOpen(false)}
+                  onClick={() => { setIsAddExpenseModalOpen(false); setEditingId(null); }}
                   className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl text-xs"
                 >
                   Cancel
@@ -1337,7 +1184,7 @@ export default function ExpensesControls() {
                   type="submit"
                   className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs shadow-sm transition-colors"
                 >
-                  Save Expense
+                  {editingId ? 'Update Expense' : 'Save Expense'}
                 </button>
               </div>
             </form>

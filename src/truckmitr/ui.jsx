@@ -70,7 +70,9 @@ export const notify = toast;
 
 export const fmtDate = (value, withTime = false) => {
   if (!value) return '—';
-  const d = typeof value === 'number' ? new Date(value < 1e12 ? value * 1000 : value) : new Date(String(value).replace(' ', 'T'));
+  const d = value instanceof Date
+    ? value
+    : typeof value === 'number' ? new Date(value < 1e12 ? value * 1000 : value) : new Date(String(value).replace(' ', 'T'));
   if (Number.isNaN(d.getTime())) return String(value);
   return d.toLocaleString('en-IN', {
     day: '2-digit', month: 'short', year: 'numeric',
@@ -381,21 +383,56 @@ export function TmTable({ columns, rows, loading, error, empty = 'No records fou
   );
 }
 
-/** Pager for a Laravel paginator ({current_page, last_page, total, from, to}). */
-export function TmPager({ pager, onPage }) {
+export const PER_PAGE_OPTIONS = [20, 50, 100];
+
+/**
+ * Pager for a Laravel paginator ({current_page, last_page, total, from, to}), with a "go to page" box
+ * and, when onPerPage is given, a rows-per-page selector.
+ */
+export function TmPager({ pager, onPage, perPage, onPerPage }) {
+  const [jump, setJump] = useState('');
   if (!pager || !pager.last_page) return null;
   const { current_page: page, last_page: last, total, from, to } = pager;
   const pages = [];
   for (let p = Math.max(1, page - 2); p <= Math.min(last, page + 2); p++) pages.push(p);
+  const target = Math.trunc(Number(jump));
+  const valid = jump !== '' && target >= 1 && target <= last && target !== page;
+  const go = (e) => {
+    e.preventDefault();
+    if (!valid) return;
+    onPage(target);
+    setJump('');
+  };
+  const navBtn = 'p-1.5 rounded-md border border-slate-200 disabled:opacity-40 hover:bg-slate-50 cursor-pointer';
   return (
-    <div className="flex flex-col sm:flex-row items-center justify-between gap-2 px-5 py-3 border-t border-slate-100 text-xs text-slate-500">
-      <span>
-        Showing <b className="text-slate-700">{from ?? 0}</b>–<b className="text-slate-700">{to ?? 0}</b> of{' '}
-        <b className="text-slate-700">{fmtNum(total)}</b>
-      </span>
+    <div className="flex flex-col lg:flex-row items-center justify-between gap-3 px-5 py-3 border-t border-slate-100 text-xs text-slate-500">
+      <div className="flex flex-wrap items-center gap-3">
+        <span>
+          Showing <b className="text-slate-700">{from ?? 0}</b>–<b className="text-slate-700">{to ?? 0}</b> of{' '}
+          <b className="text-slate-700">{fmtNum(total)}</b> · Page <b className="text-slate-700">{fmtNum(page)}</b> of{' '}
+          <b className="text-slate-700">{fmtNum(last)}</b>
+        </span>
+        {onPerPage && (
+          <label className="inline-flex items-center gap-1.5">
+            Rows per page
+            <select
+              value={perPage || pager.per_page || 20}
+              onChange={(e) => onPerPage(Number(e.target.value))}
+              className="px-2 py-1 border border-slate-200 rounded-md bg-white text-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            >
+              {[...new Set([...PER_PAGE_OPTIONS, Number(perPage || pager.per_page || 20)])].sort((a, b) => a - b).map((n) => (
+                <option key={n} value={n}>{n}</option>
+              ))}
+            </select>
+          </label>
+        )}
+      </div>
       {last > 1 && (
-        <div className="flex items-center gap-1">
-          <button type="button" disabled={page <= 1} onClick={() => onPage(page - 1)} className="p-1.5 rounded-md border border-slate-200 disabled:opacity-40 hover:bg-slate-50 cursor-pointer">
+        <div className="flex flex-wrap items-center justify-center gap-1">
+          <button type="button" disabled={page <= 1} onClick={() => onPage(1)} className={cx(navBtn, 'px-2 font-semibold')} title="First page">
+            First
+          </button>
+          <button type="button" disabled={page <= 1} onClick={() => onPage(page - 1)} className={navBtn} title="Previous page">
             <ChevronLeft className="w-3.5 h-3.5" />
           </button>
           {pages[0] > 1 && <span className="px-1">…</span>}
@@ -410,9 +447,28 @@ export function TmPager({ pager, onPage }) {
             </button>
           ))}
           {pages[pages.length - 1] < last && <span className="px-1">…</span>}
-          <button type="button" disabled={page >= last} onClick={() => onPage(page + 1)} className="p-1.5 rounded-md border border-slate-200 disabled:opacity-40 hover:bg-slate-50 cursor-pointer">
+          <button type="button" disabled={page >= last} onClick={() => onPage(page + 1)} className={navBtn} title="Next page">
             <ChevronRight className="w-3.5 h-3.5" />
           </button>
+          <button type="button" disabled={page >= last} onClick={() => onPage(last)} className={cx(navBtn, 'px-2 font-semibold')} title="Last page">
+            Last
+          </button>
+          <form onSubmit={go} className="inline-flex items-center gap-1 ml-2">
+            <span>Go to page</span>
+            <input
+              type="number"
+              min={1}
+              max={last}
+              value={jump}
+              onChange={(e) => setJump(e.target.value)}
+              placeholder={`1–${last}`}
+              aria-label="Page number"
+              className="w-20 px-2 py-1 border border-slate-200 rounded-md bg-white text-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            />
+            <button type="submit" disabled={!valid} className="px-2.5 py-1 rounded-md bg-blue-600 text-white font-semibold disabled:opacity-40 cursor-pointer">
+              Go
+            </button>
+          </form>
         </div>
       )}
     </div>
@@ -531,6 +587,27 @@ export function TmForm({ fields, values, onChange, errors = {} }) {
                 className="block w-full text-xs text-slate-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
               />
               {field.current && <div className="mt-2"><TmImage src={field.current} className="h-16 w-auto max-w-full" /></div>}
+            </div>
+          );
+        } else if (field.type === 'checkboxes') {
+          const selected = (values[field.name] || []).map(String);
+          control = (
+            <div className="flex flex-wrap gap-2">
+              {(field.options || []).map((opt) => {
+                const o = typeof opt === 'object' ? opt : { value: opt, label: opt };
+                const on = selected.includes(String(o.value));
+                return (
+                  <label key={o.value} className={cx('px-3 py-1.5 rounded-lg border text-xs cursor-pointer', on ? 'bg-blue-50 border-blue-300 text-blue-700 font-semibold' : 'bg-white border-slate-200 text-slate-600')}>
+                    <input
+                      type="checkbox"
+                      className="hidden"
+                      checked={on}
+                      onChange={() => set(field.name, on ? selected.filter((v) => v !== String(o.value)) : [...selected, String(o.value)])}
+                    />
+                    {o.label}
+                  </label>
+                );
+              })}
             </div>
           );
         } else if (field.type === 'checkbox') {

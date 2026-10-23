@@ -15,6 +15,37 @@ import {
   RefreshCw
 } from 'lucide-react';
 
+// Rows of the metrics matrix: key in telemetry.period_matrix, label, row style
+const MATRIX_ROWS = [
+  { key: 'registrations', label: 'Total Registrations (Platform Wide)', tone: 'lead' },
+  { key: 'revenue', label: 'Total Platform Revenue Realized', tone: 'money' },
+  { key: 'drivers', label: 'Registered Drivers' },
+  { key: 'paid_drivers', label: 'Paid Drivers Added (Subscribed)', tone: 'paid' },
+  { key: 'profile_complete_drivers', label: 'Profile Completed by Driver (100%)' },
+  { key: 'transporters', label: 'Registered Transporters (Fleet Owners)' },
+  { key: 'paid_transporters', label: 'Paid Transporters Added (Subscribed)', tone: 'paid' },
+  { key: 'profile_complete_transporters', label: 'Profile Completed by Transporter (100%)' },
+  { key: 'foremen', label: 'Registered Driver Foremen' },
+  { key: 'associations', label: 'Registered Driver Association' },
+  { key: 'dhabas', label: 'Registered Highway Dhabas & Rest Points' },
+  { key: 'punctures', label: 'Registered Puncture & Repair Points' },
+  { key: 'quiz_attempts', label: 'Attempt for Training & Safety Quiz' },
+  { key: 'jobs_posted', label: 'New Job Posted (All Categories)' },
+  { key: 'applications', label: 'Total Driver Applications Received' },
+  { key: 'hired', label: 'Driver Applications Accepted & Hired', tone: 'hired' },
+  { key: 'driver_verifications', label: 'Verification Initiated: Driver Documents' },
+  { key: 'transporter_verifications', label: 'Verification Initiated: Transporter GST/PAN' },
+];
+
+const ROW_TONES = {
+  lead: { tr: 'bg-blue-50/40 hover:bg-blue-50/70 font-semibold text-slate-900', dot: 'bg-blue-600' },
+  money: { tr: 'bg-emerald-50/60 hover:bg-emerald-50/90 font-bold text-emerald-900', dot: 'bg-emerald-600' },
+  paid: { tr: 'hover:bg-slate-50 bg-purple-50/10 text-purple-900 font-medium' },
+  hired: { tr: 'hover:bg-slate-50 text-emerald-700' },
+};
+
+const fmtCount = (v, money) => (money ? '₹' : '') + Number(v || 0).toLocaleString();
+
 export default function Dashboard() {
   const [telemetry, setTelemetry] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -22,7 +53,8 @@ export default function Dashboard() {
   // Modals & Interactive State
   const [callReportOpen, setCallReportOpen] = useState(false);
   const [selectedJob, setSelectedJob] = useState(null);
-  const [dateRange, setDateRange] = useState({ from: '01-09-2026', to: '30-09-2026' });
+  // optional custom period for the metrics matrix (adds a "Selected Range" column)
+  const [dateRange, setDateRange] = useState({ from: '', to: '' });
   const [jobSearch, setJobSearch] = useState('');
   const [timelinePeriod, setTimelinePeriod] = useState('Last 30 Days');
   const [exportNotification, setExportNotification] = useState('');
@@ -30,7 +62,8 @@ export default function Dashboard() {
   const fetchTelemetry = async () => {
     try {
       setLoading(true);
-      const res = await api.get('/admin/executive-console-telemetry');
+      const params = dateRange.from && dateRange.to ? { from: dateRange.from, to: dateRange.to } : {};
+      const res = await api.get('/admin/executive-console-telemetry', { params });
       if (res.data && res.data.status === 'success') {
         setTelemetry(res.data);
       }
@@ -47,16 +80,15 @@ export default function Dashboard() {
 
   const handleExport = (type = 'general') => {
     const csvRows = [
-      ['Metric', 'Total', 'Today', 'Last 7 Days', 'MTD', 'Last Month', 'YTD'],
-      ['Total Registrations', matrix.total_registrations, kpis.today_registrations, '2,259', kpis.month_registrations, '10,501', matrix.total_registrations],
-      ['Total Platform Revenue', `₹${matrix.total_revenue}`, `₹${matrix.today_revenue}`, `₹${matrix.last7_revenue}`, `₹${matrix.mtd_revenue}`, `₹${matrix.last_month_revenue}`, `₹${matrix.total_revenue}`],
-      ['Registered Drivers', matrix.total_drivers, cohort.drivers.today, cohort.drivers.last7, cohort.drivers.month, cohort.drivers.last_month, matrix.total_drivers],
-      ['Paid Drivers', matrix.subscribed_drivers, cohort.subscribed_drivers.today, cohort.subscribed_drivers.last7, cohort.subscribed_drivers.month, cohort.subscribed_drivers.last_month, matrix.subscribed_drivers],
-      ['Registered Transporters', matrix.total_transporters, cohort.transporters.today, cohort.transporters.last7, cohort.transporters.month, cohort.transporters.last_month, matrix.total_transporters],
-      ['Paid Transporters', matrix.subscribed_transporters, cohort.subscribed_transporters.today, cohort.subscribed_transporters.last7, cohort.subscribed_transporters.month, cohort.subscribed_transporters.last_month, matrix.subscribed_transporters],
-      ['Active Jobs', lifecycle.active, '9', '34', '148', '142', lifecycle.total_posted]
-    ];
-    
+      ['Metric', ...periodCols.map(c => c.label)],
+      ...MATRIX_ROWS.map(r => [r.label, ...periodCols.map(c => (periodMatrix[r.key] || {})[c.key] ?? 0)]),
+      ['Outgoing Calls', calls.outbound],
+      ['Connected', calls.connected],
+      ['Not Connected', calls.not_connected],
+      ['Callback', calls.callback],
+      ['No Status', calls.no_status],
+    ].map(row => row.map(v => `"${String(v).replace(/"/g, '""')}"`));
+
     const csvContent = "data:text/csv;charset=utf-8," + csvRows.map(e => e.join(",")).join("\n");
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
@@ -70,85 +102,87 @@ export default function Dashboard() {
     setTimeout(() => setExportNotification(''), 4000);
   };
 
-  // Safe fallback bindings to live API telemetry
+  // Live API telemetry; zeros until it loads (never placeholder numbers)
+  const emptyPeriod = { total: 0, today: 0, month: 0, last7: 0, last_month: 0 };
   const kpis = telemetry?.kpis || {
-    total_registrations: 107248,
-    month_registrations: 11678,
-    today_registrations: 347,
-    this_month_revenue: 273509,
-    mtd_rolling_revenue: 64808,
-    job_applications: 2733,
-    today_applications: 73,
-    total_active_jobs: 1498,
-    live_jobs: 103,
-    verified_driver_pool: 4335
+    total_registrations: 0,
+    month_registrations: 0,
+    today_registrations: 0,
+    this_month_revenue: 0,
+    mtd_rolling_revenue: 0,
+    job_applications: 0,
+    today_applications: 0,
+    total_active_jobs: 0,
+    live_jobs: 0,
+    verified_driver_pool: 0
   };
 
   const cohort = telemetry?.cohort_overview || {
-    drivers: { total: 79777, today: 280, month: 8847, last7: 2259, last_month: 10501 },
-    transporters: { total: 23426, today: 51, month: 2178, last7: 365, last_month: 3081 },
-    subscribed_drivers: { total: 4335, today: 8, month: 214, last7: 61, last_month: 304 },
-    subscribed_transporters: { total: 1121, today: 5, month: 118, last7: 24, last_month: 125 },
-    foremen_associations: { total: 3500, today: 8, month: 98, last7: 28, last_month: 310 },
-    active_postings: { total: 103, today: 9, month: 148, last7: 34, last_month: 142 }
+    drivers: emptyPeriod,
+    transporters: emptyPeriod,
+    subscribed_drivers: emptyPeriod,
+    subscribed_transporters: emptyPeriod,
+    foremen_associations: emptyPeriod,
+    active_postings: emptyPeriod,
   };
+  const paidOthers = cohort.subscribed_others?.total || 0;
 
   const lifecycle = telemetry?.job_lifecycle || {
-    total_posted: 1498,
-    active: 103,
-    pending: 24,
-    inactive: 9,
-    closed: 179,
-    expired: 1183
+    total_posted: 0, active: 0, pending: 0, inactive: 0, closed: 0, expired: 0
   };
 
-  const calls = telemetry?.call_analytics || {
-    total_calls: 249009,
-    outbound: 249007,
-    inbound: 2,
-    connected: 81047,
-    not_connected: 153611,
-    callback: 11645,
-    today_calls: 864,
-    today_connected: 350,
-    connect_rate: '32.5%'
+  const calls = {
+    total_calls: 0, outbound: 0, inbound: 0, connected: 0, not_connected: 0, callback: 0,
+    no_status: 0, today_calls: 0, today_connected: 0, connect_rate: '0%',
+    ...(telemetry?.call_analytics || {})
   };
+  const callPct = (n) => (calls.outbound ? ((n / calls.outbound) * 100).toFixed(1) : '0.0') + '%';
 
-  const statesList = telemetry?.state_registrations || [
-    { name: 'Uttar Pradesh', count: '23,114', percent: '21.6%' },
-    { name: 'Rajasthan', count: '13,815', percent: '12.9%' },
-    { name: 'Maharashtra', count: '9,757', percent: '9.1%' },
-    { name: 'Madhya Pradesh', count: '8,630', percent: '8.0%' },
-    { name: 'Bihar', count: '7,410', percent: '6.9%' },
-    { name: 'Haryana', count: '6,479', percent: '6.0%' },
-    { name: 'Gujarat', count: '5,739', percent: '5.4%' },
-    { name: 'Delhi', count: '4,243', percent: '4.0%' },
-    { name: 'Punjab', count: '3,896', percent: '3.6%' }
-  ];
+  const statesList = telemetry?.state_registrations || [];
 
   const recentJobsList = telemetry?.recent_jobs || [];
   const recentTransportersList = telemetry?.recent_transporters || [];
   const recentSubscribedTransportersList = telemetry?.recent_subscribed_transporters || [];
-  const matrix = telemetry?.matrix_totals || {
-    total_registrations: 107248,
-    total_revenue: 1702508,
-    today_revenue: 14286,
-    last7_revenue: 64808,
-    mtd_revenue: 273509,
-    last_month_revenue: 293526,
-    total_drivers: 79777,
-    subscribed_drivers: 4335,
-    total_transporters: 23426,
-    subscribed_transporters: 1121,
-    total_foremen: 2275,
-    total_associations: 1225,
-    total_dhabas: 250,
-    total_punctures: 293,
-    quiz_attempts: 1277,
-    total_jobs: 1498,
-    total_applications: 36029,
-    hired_applications: 4685
-  };
+  const matrix = telemetry?.matrix_totals || { total_transporters: 0 };
+
+  // Metrics matrix: every cell comes from period_matrix
+  const periodMatrix = telemetry?.period_matrix || {};
+  const hasRange = periodMatrix.registrations?.range !== undefined;
+  const periodCols = [
+    { key: 'total', label: 'Total' },
+    { key: 'today', label: 'Today' },
+    { key: 'last7', label: 'Last 7 Days' },
+    { key: 'mtd', label: 'MTD' },
+    { key: 'last_month', label: 'Last Month' },
+    { key: 'ytd', label: 'YTD' },
+    ...(hasRange ? [{ key: 'range', label: 'Selected Range' }] : []),
+  ];
+
+  // Registrations timeline (real daily counts)
+  const timelineDays = timelinePeriod === 'Last 7 Days' ? 7 : timelinePeriod === 'Last 14 Days' ? 14 : 30;
+  const timeline = (telemetry?.registration_timeline || []).slice(-timelineDays);
+  const timelineMax = Math.max(1, ...timeline.flatMap(d => [d.drivers, d.transporters, d.others]));
+  const tx = (i) => (timeline.length > 1 ? (i / (timeline.length - 1)) * 600 : 300);
+  const ty = (v) => 210 - (v / timelineMax) * 190;
+  const linePath = (k) => timeline.map((d, i) => `${i ? 'L' : 'M'} ${tx(i).toFixed(1)} ${ty(d[k]).toFixed(1)}`).join(' ');
+  const timelineSum = (k) => timeline.reduce((a, d) => a + d[k], 0);
+  const shortDate = (d) => new Date(d + 'T00:00:00').toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
+  const timelineTicks = timeline.length ? [0, Math.floor((timeline.length - 1) / 2), timeline.length - 1] : [];
+
+  // Subscribed users donut
+  const DONUT_C = 2 * Math.PI * 38;
+  const paidTotal = cohort.subscribed_drivers.total + cohort.subscribed_transporters.total + paidOthers;
+  let donutOffset = 0;
+  const donutSlices = [
+    { value: cohort.subscribed_drivers.total, color: '#8B5CF6' },
+    { value: cohort.subscribed_transporters.total, color: '#3B82F6' },
+    { value: paidOthers, color: '#10B981' },
+  ].map(sl => {
+    const len = paidTotal ? (sl.value / paidTotal) * DONUT_C : 0;
+    const out = { ...sl, len, offset: donutOffset };
+    donutOffset += len;
+    return out;
+  });
 
   const filteredJobs = recentJobsList.filter(job => 
     !jobSearch || 
@@ -278,11 +312,11 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* KPI 5: Total Active Jobs */}
+          {/* KPI 5: Total Jobs Posted (live active below) */}
           <div className="bg-white p-3.5 rounded-xl border border-slate-200 shadow-xs flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between mb-2">
-                <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Total Active Jobs</span>
+                <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Total Jobs Posted</span>
                 <div className="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
                   <Briefcase className="w-3.5 h-3.5" />
                 </div>
@@ -325,7 +359,7 @@ export default function Dashboard() {
             <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wide">Agents Call Analytics</h2>
           </div>
           <div className="flex items-center gap-2 text-xs">
-            <span className="text-slate-500 font-medium">Total Recorded Calls: <b className="text-slate-800">{calls.total_calls.toLocaleString()}</b></span>
+            <span className="text-slate-500 font-medium">Total Recorded Calls: <b className="text-slate-800">{calls.total_calls.toLocaleString()}</b> <span className="text-slate-400">(Outgoing {calls.outbound.toLocaleString()} + Incoming {calls.inbound.toLocaleString()})</span></span>
           </div>
         </div>
 
@@ -338,7 +372,7 @@ export default function Dashboard() {
             <span className="text-xs text-slate-400 font-medium">Total Outbound Dials</span>
           </div>
           {/* Call Disposition Matrix */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-3 pt-3 border-t border-slate-200/60 text-center">
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mt-3 pt-3 border-t border-slate-200/60 text-center">
             <div className="bg-white p-2.5 rounded-lg border border-slate-200 shadow-xs">
               <div className="text-[10px] text-slate-500 uppercase font-semibold">Connected</div>
               <div className="text-base font-bold text-emerald-700 mt-0.5 tabular-nums">{calls.connected.toLocaleString()}</div>
@@ -350,6 +384,11 @@ export default function Dashboard() {
             <div className="bg-white p-2.5 rounded-lg border border-slate-200 shadow-xs">
               <div className="text-[10px] text-slate-500 uppercase font-semibold">Callback</div>
               <div className="text-base font-bold text-blue-600 mt-0.5 tabular-nums">{calls.callback.toLocaleString()}</div>
+            </div>
+            {/* Outgoing calls saved without a status, so the four boxes add up to the outbound total */}
+            <div className="bg-white p-2.5 rounded-lg border border-slate-200 shadow-xs" title="Dialled, but no call outcome was saved">
+              <div className="text-[10px] text-slate-500 uppercase font-semibold">Pending / No Status</div>
+              <div className="text-base font-bold text-slate-600 mt-0.5 tabular-nums">{calls.no_status.toLocaleString()}</div>
             </div>
             <div className="bg-white p-2.5 rounded-lg border border-slate-200 shadow-xs">
               <div className="text-[10px] text-slate-500 uppercase font-semibold">Today Dials</div>
@@ -453,7 +492,7 @@ export default function Dashboard() {
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
               <div>
                 <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wide">Registered Users Timeline</h3>
-                <p className="text-xs text-slate-400">Daily registrations across Drivers, Transporters & Foremen</p>
+                <p className="text-xs text-slate-400">Daily registrations across Drivers, Transporters & Foremen (legend = period total)</p>
               </div>
               <div className="flex items-center gap-2">
                 <select 
@@ -469,43 +508,38 @@ export default function Dashboard() {
             </div>
             {/* SVG Multi-Series Area / Line Visualizer */}
             <div className="mt-4 relative h-60 w-full">
+              <span className="absolute -top-1 left-0 text-[10px] text-slate-400 tabular-nums">{timelineMax.toLocaleString()}/day</span>
               <svg className="w-full h-full overflow-visible" preserveAspectRatio="none" viewBox="0 0 600 220">
                 <line stroke="#F1F5F9" strokeWidth="1" x1="0" x2="600" y1="20" y2="20"></line>
-                <line stroke="#F1F5F9" strokeWidth="1" x1="0" x2="600" y1="70" y2="70"></line>
-                <line stroke="#F1F5F9" strokeWidth="1" x1="0" x2="600" y1="120" y2="120"></line>
-                <line stroke="#F1F5F9" strokeWidth="1" x1="0" x2="600" y1="170" y2="170"></line>
+                <line stroke="#F1F5F9" strokeWidth="1" x1="0" x2="600" y1="115" y2="115"></line>
                 <line stroke="#E2E8F0" strokeWidth="1" x1="0" x2="600" y1="210" y2="210"></line>
-                <defs>
-                  <linearGradient id="driverGrad" x1="0%" x2="0%" y1="0%" y2="100%">
-                    <stop offset="0%" stopColor="#3B82F6" stopOpacity="0.25"></stop>
-                    <stop offset="100%" stopColor="#3B82F6" stopOpacity="0.0"></stop>
-                  </linearGradient>
-                </defs>
-                <path d="M 0 170 Q 75 140 150 110 T 300 95 T 450 60 T 600 80 L 600 210 L 0 210 Z" fill="url(#driverGrad)"></path>
-                <path d="M 0 170 Q 75 140 150 110 T 300 95 T 450 60 T 600 80" fill="none" stroke="#2563EB" strokeLinecap="round" strokeWidth="2.5"></path>
-                <path d="M 0 190 Q 90 175 180 160 T 360 145 T 540 120 L 600 130" fill="none" stroke="#0D9488" strokeDasharray="3 3" strokeWidth="2"></path>
-                <path d="M 0 205 Q 120 200 240 195 T 480 185 L 600 190" fill="none" stroke="#D97706" strokeWidth="1.8"></path>
+                <path d={linePath('drivers')} fill="none" stroke="#2563EB" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" vectorEffect="non-scaling-stroke"></path>
+                <path d={linePath('transporters')} fill="none" stroke="#0D9488" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" vectorEffect="non-scaling-stroke"></path>
+                <path d={linePath('others')} fill="none" stroke="#D97706" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" vectorEffect="non-scaling-stroke"></path>
+                {/* hover targets: one column per day */}
+                {timeline.map((d, i) => (
+                  <rect key={d.date} x={tx(i) - 300 / Math.max(1, timeline.length)} y="0" width={600 / Math.max(1, timeline.length)} height="210" fill="transparent">
+                    <title>{`${shortDate(d.date)} — Drivers: ${d.drivers}, Transporters: ${d.transporters}, Foremen & Other: ${d.others}`}</title>
+                  </rect>
+                ))}
               </svg>
               <div className="flex justify-between text-[10px] text-slate-400 mt-2 font-medium">
-                <span>Day 01</span>
-                <span>Day 06</span>
-                <span>Day 12</span>
-                <span>Day 18</span>
-                <span>Day 24</span>
-                <span>Today</span>
+                {timelineTicks.map((i, n) => (
+                  <span key={n}>{n === timelineTicks.length - 1 ? 'Today' : shortDate(timeline[i].date)}</span>
+                ))}
               </div>
             </div>
           </div>
           {/* Legend */}
           <div className="flex items-center justify-center gap-6 pt-3 mt-2 border-t border-slate-100 text-xs flex-wrap">
             <span className="flex items-center gap-1.5 font-medium text-slate-700">
-              <span className="w-3 h-1 bg-blue-600 rounded"></span> Drivers ({cohort.drivers.total.toLocaleString()})
+              <span className="w-3 h-1 bg-blue-600 rounded"></span> Drivers ({timelineSum('drivers').toLocaleString()})
             </span>
             <span className="flex items-center gap-1.5 font-medium text-slate-700">
-              <span className="w-3 h-1 bg-teal-600 rounded"></span> Transporters ({cohort.transporters.total.toLocaleString()})
+              <span className="w-3 h-1 bg-teal-600 rounded"></span> Transporters ({timelineSum('transporters').toLocaleString()})
             </span>
             <span className="flex items-center gap-1.5 font-medium text-slate-700">
-              <span className="w-3 h-1 bg-amber-600 rounded"></span> Foremen & Other ({cohort.foremen_associations.total.toLocaleString()})
+              <span className="w-3 h-1 bg-amber-600 rounded"></span> Foremen & Other ({timelineSum('others').toLocaleString()})
             </span>
           </div>
         </div>
@@ -518,7 +552,7 @@ export default function Dashboard() {
                 <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wide">Subscribed Users</h3>
                 <p className="text-xs text-slate-400">Paid tier distribution by stakeholder role</p>
               </div>
-              <span className="text-xs font-bold text-purple-700 bg-purple-50 px-2 py-0.5 rounded border border-purple-200">Total: {(cohort.subscribed_drivers.total + cohort.subscribed_transporters.total).toLocaleString()}</span>
+              <span className="text-xs font-bold text-purple-700 bg-purple-50 px-2 py-0.5 rounded border border-purple-200">Total: {paidTotal.toLocaleString()}</span>
             </div>
             {/* Visual Donut Chart Container */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-6 py-6">
@@ -526,13 +560,13 @@ export default function Dashboard() {
               <div className="relative w-44 h-44 flex items-center justify-center">
                 <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
                   <circle cx="50" cy="50" fill="none" r="38" stroke="#F1F5F9" strokeWidth="12"></circle>
-                  <circle cx="50" cy="50" fill="none" r="38" stroke="#8B5CF6" strokeDasharray="181.4 238.7" strokeDashoffset="0" strokeWidth="12"></circle>
-                  <circle cx="50" cy="50" fill="none" r="38" stroke="#3B82F6" strokeDasharray="43.0 238.7" strokeDashoffset="-181.4" strokeWidth="12"></circle>
-                  <circle cx="50" cy="50" fill="none" r="38" stroke="#10B981" strokeDasharray="14.3 238.7" strokeDashoffset="-224.4" strokeWidth="12"></circle>
+                  {donutSlices.map((sl, i) => sl.len > 0 && (
+                    <circle key={i} cx="50" cy="50" fill="none" r="38" stroke={sl.color} strokeDasharray={`${sl.len} ${DONUT_C}`} strokeDashoffset={-sl.offset} strokeWidth="12"></circle>
+                  ))}
                 </svg>
                 <div className="absolute flex flex-col items-center">
                   <span className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Total Paid</span>
-                  <span className="text-xl font-bold text-slate-900 tabular-nums">{(cohort.subscribed_drivers.total + cohort.subscribed_transporters.total).toLocaleString()}</span>
+                  <span className="text-xl font-bold text-slate-900 tabular-nums">{paidTotal.toLocaleString()}</span>
                 </div>
               </div>
               {/* Legend / Proportions */}
@@ -556,7 +590,7 @@ export default function Dashboard() {
                     <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
                     Other Users
                   </span>
-                  <span className="font-bold text-slate-900 tabular-nums">0</span>
+                  <span className="font-bold text-slate-900 tabular-nums">{paidOthers.toLocaleString()}</span>
                 </div>
               </div>
             </div>
@@ -774,7 +808,7 @@ export default function Dashboard() {
             <div className="flex items-center gap-2">
               <span className="w-3 h-3 rounded bg-blue-600"></span>
               <h2 className="text-base font-bold text-slate-900 uppercase tracking-tight">Comprehensive Enterprise Metrics Matrix</h2>
-              <span className="text-xs bg-slate-100 text-slate-600 font-semibold px-2 py-0.5 rounded">18 Core Dimensions</span>
+              <span className="text-xs bg-slate-100 text-slate-600 font-semibold px-2 py-0.5 rounded">{MATRIX_ROWS.length} Core Dimensions</span>
             </div>
             <p className="text-xs text-slate-400 mt-1">Holistic multi-tenancy telemetry across drivers, fleet owners, ecosystem nodes, and revenue</p>
           </div>
@@ -783,23 +817,24 @@ export default function Dashboard() {
             <div className="flex items-center gap-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5">
               <span className="text-slate-400 font-medium">From:</span>
               <input 
-                type="text" 
+                type="date" 
                 value={dateRange.from}
                 onChange={(e) => setDateRange({ ...dateRange, from: e.target.value })}
-                className="p-0 border-0 bg-transparent text-xs font-semibold text-slate-700 w-20 focus:ring-0" 
+                className="p-0 border-0 bg-transparent text-xs font-semibold text-slate-700 w-28 focus:ring-0" 
               />
               <span className="text-slate-300">•</span>
               <span className="text-slate-400 font-medium">To:</span>
               <input 
-                type="text" 
+                type="date" 
                 value={dateRange.to}
                 onChange={(e) => setDateRange({ ...dateRange, to: e.target.value })}
-                className="p-0 border-0 bg-transparent text-xs font-semibold text-slate-700 w-20 focus:ring-0" 
+                className="p-0 border-0 bg-transparent text-xs font-semibold text-slate-700 w-28 focus:ring-0" 
               />
             </div>
             <button 
-              onClick={() => handleExport('search')}
-              className="px-3 py-1.5 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors shadow-xs"
+              onClick={fetchTelemetry}
+              disabled={!dateRange.from || !dateRange.to}
+              className="px-3 py-1.5 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 rounded-lg transition-colors shadow-xs"
             >
               Search
             </button>
@@ -819,207 +854,35 @@ export default function Dashboard() {
             <thead className="bg-blue-900 text-white font-semibold text-[11px] uppercase tracking-wider">
               <tr>
                 <th className="py-3 px-4">METRIC / DIMENSION NAME</th>
-                <th className="py-3 px-4 text-right">TOTAL</th>
-                <th className="py-3 px-4 text-right">TODAY</th>
-                <th className="py-3 px-4 text-right">LAST 7 DAYS</th>
-                <th className="py-3 px-4 text-right">MTD</th>
-                <th className="py-3 px-4 text-right">LAST MONTH</th>
-                <th className="py-3 px-4 text-right">YTD</th>
+                {periodCols.map(c => (
+                  <th key={c.key} className="py-3 px-4 text-right">{c.label.toUpperCase()}</th>
+                ))}
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-slate-700">
-              {/* Row 1: Total Registrations */}
-              <tr className="bg-blue-50/40 hover:bg-blue-50/70 font-semibold text-slate-900">
-                <td className="py-2.5 px-4 flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-blue-600"></span>
-                  Total Registrations (Platform Wide)
-                </td>
-                <td className="py-2.5 px-4 text-right tabular-nums font-bold">{matrix.total_registrations.toLocaleString()}</td>
-                <td className="py-2.5 px-4 text-right tabular-nums text-blue-700 font-bold">{kpis.today_registrations}</td>
-                <td className="py-2.5 px-4 text-right tabular-nums">2,259</td>
-                <td className="py-2.5 px-4 text-right tabular-nums">{kpis.month_registrations.toLocaleString()}</td>
-                <td className="py-2.5 px-4 text-right tabular-nums">10,501</td>
-                <td className="py-2.5 px-4 text-right tabular-nums text-slate-900 font-bold">{matrix.total_registrations.toLocaleString()}</td>
-              </tr>
-              {/* Row 2: Total Platform Revenue */}
-              <tr className="bg-emerald-50/60 hover:bg-emerald-50/90 font-bold text-emerald-900">
-                <td className="py-2.5 px-4 flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
-                  Total Platform Revenue Realized
-                </td>
-                <td className="py-2.5 px-4 text-right tabular-nums font-black text-emerald-800">₹{Number(matrix.total_revenue).toLocaleString()}</td>
-                <td className="py-2.5 px-4 text-right tabular-nums text-emerald-700">₹{Number(matrix.today_revenue).toLocaleString()}</td>
-                <td className="py-2.5 px-4 text-right tabular-nums text-emerald-700">₹{Number(matrix.last7_revenue).toLocaleString()}</td>
-                <td className="py-2.5 px-4 text-right tabular-nums text-emerald-700">₹{Number(matrix.mtd_revenue).toLocaleString()}</td>
-                <td className="py-2.5 px-4 text-right tabular-nums text-emerald-700">₹{Number(matrix.last_month_revenue).toLocaleString()}</td>
-                <td className="py-2.5 px-4 text-right tabular-nums text-emerald-900">₹{Number(matrix.total_revenue).toLocaleString()}</td>
-              </tr>
-              {/* Row 3: Registered Drivers */}
-              <tr className="hover:bg-slate-50">
-                <td className="py-2.5 px-4 text-slate-800">Registered Drivers</td>
-                <td className="py-2.5 px-4 text-right tabular-nums font-semibold">{matrix.total_drivers.toLocaleString()}</td>
-                <td className="py-2.5 px-4 text-right tabular-nums font-medium text-blue-600">{cohort.drivers.today}</td>
-                <td className="py-2.5 px-4 text-right tabular-nums">{cohort.drivers.last7}</td>
-                <td className="py-2.5 px-4 text-right tabular-nums">{cohort.drivers.month.toLocaleString()}</td>
-                <td className="py-2.5 px-4 text-right tabular-nums">{cohort.drivers.last_month.toLocaleString()}</td>
-                <td className="py-2.5 px-4 text-right tabular-nums">{matrix.total_drivers.toLocaleString()}</td>
-              </tr>
-              {/* Row 4: Paid Drivers Added */}
-              <tr className="hover:bg-slate-50 bg-purple-50/10">
-                <td className="py-2.5 px-4 text-purple-900 font-medium">Paid Drivers Added (Subscribed)</td>
-                <td className="py-2.5 px-4 text-right tabular-nums font-semibold text-purple-800">{matrix.subscribed_drivers.toLocaleString()}</td>
-                <td className="py-2.5 px-4 text-right tabular-nums font-bold text-purple-700">{cohort.subscribed_drivers.today}</td>
-                <td className="py-2.5 px-4 text-right tabular-nums">{cohort.subscribed_drivers.last7}</td>
-                <td className="py-2.5 px-4 text-right tabular-nums">{cohort.subscribed_drivers.month}</td>
-                <td className="py-2.5 px-4 text-right tabular-nums">{cohort.subscribed_drivers.last_month}</td>
-                <td className="py-2.5 px-4 text-right tabular-nums text-purple-900">{matrix.subscribed_drivers.toLocaleString()}</td>
-              </tr>
-              {/* Row 5: Profile Completed by Driver */}
-              <tr className="hover:bg-slate-50">
-                <td className="py-2.5 px-4 text-slate-800">Profile Completed by Driver</td>
-                <td className="py-2.5 px-4 text-right tabular-nums font-semibold">54,120</td>
-                <td className="py-2.5 px-4 text-right tabular-nums">84</td>
-                <td className="py-2.5 px-4 text-right tabular-nums">215</td>
-                <td className="py-2.5 px-4 text-right tabular-nums">840</td>
-                <td className="py-2.5 px-4 text-right tabular-nums">2,890</td>
-                <td className="py-2.5 px-4 text-right tabular-nums">54,120</td>
-              </tr>
-              {/* Row 6: Registered Transporters */}
-              <tr className="hover:bg-slate-50">
-                <td className="py-2.5 px-4 text-slate-800">Registered Transporters (Fleet Owners)</td>
-                <td className="py-2.5 px-4 text-right tabular-nums font-semibold">{matrix.total_transporters.toLocaleString()}</td>
-                <td className="py-2.5 px-4 text-right tabular-nums font-medium text-blue-600">{cohort.transporters.today}</td>
-                <td className="py-2.5 px-4 text-right tabular-nums">{cohort.transporters.last7}</td>
-                <td className="py-2.5 px-4 text-right tabular-nums">{cohort.transporters.month.toLocaleString()}</td>
-                <td className="py-2.5 px-4 text-right tabular-nums">{cohort.transporters.last_month.toLocaleString()}</td>
-                <td className="py-2.5 px-4 text-right tabular-nums">{matrix.total_transporters.toLocaleString()}</td>
-              </tr>
-              {/* Row 7: Paid Transporters Added */}
-              <tr className="hover:bg-slate-50 bg-purple-50/10">
-                <td className="py-2.5 px-4 text-purple-900 font-medium">Paid Transporters Added (Subscribed)</td>
-                <td className="py-2.5 px-4 text-right tabular-nums font-semibold text-purple-800">{matrix.subscribed_transporters.toLocaleString()}</td>
-                <td className="py-2.5 px-4 text-right tabular-nums font-bold text-purple-700">{cohort.subscribed_transporters.today}</td>
-                <td className="py-2.5 px-4 text-right tabular-nums">{cohort.subscribed_transporters.last7}</td>
-                <td className="py-2.5 px-4 text-right tabular-nums">{cohort.subscribed_transporters.month}</td>
-                <td className="py-2.5 px-4 text-right tabular-nums">{cohort.subscribed_transporters.last_month}</td>
-                <td className="py-2.5 px-4 text-right tabular-nums text-purple-900">{matrix.subscribed_transporters.toLocaleString()}</td>
-              </tr>
-              {/* Row 8: Profile Completed by Transporter */}
-              <tr className="hover:bg-slate-50">
-                <td className="py-2.5 px-4 text-slate-800">Profile Completed by Transporter</td>
-                <td className="py-2.5 px-4 text-right tabular-nums font-semibold">18,430</td>
-                <td className="py-2.5 px-4 text-right tabular-nums">28</td>
-                <td className="py-2.5 px-4 text-right tabular-nums">78</td>
-                <td className="py-2.5 px-4 text-right tabular-nums">330</td>
-                <td className="py-2.5 px-4 text-right tabular-nums">910</td>
-                <td className="py-2.5 px-4 text-right tabular-nums">18,430</td>
-              </tr>
-              {/* Row 9: Registered Driver Foremen */}
-              <tr className="hover:bg-slate-50">
-                <td className="py-2.5 px-4 text-slate-800">Registered Driver Foremen</td>
-                <td className="py-2.5 px-4 text-right tabular-nums font-semibold">{matrix.total_foremen.toLocaleString()}</td>
-                <td className="py-2.5 px-4 text-right tabular-nums">4</td>
-                <td className="py-2.5 px-4 text-right tabular-nums">14</td>
-                <td className="py-2.5 px-4 text-right tabular-nums">42</td>
-                <td className="py-2.5 px-4 text-right tabular-nums">124</td>
-                <td className="py-2.5 px-4 text-right tabular-nums">{matrix.total_foremen.toLocaleString()}</td>
-              </tr>
-              {/* Row 10: Registered Driver Association */}
-              <tr className="hover:bg-slate-50">
-                <td className="py-2.5 px-4 text-slate-800">Registered Driver Association</td>
-                <td className="py-2.5 px-4 text-right tabular-nums font-semibold">{matrix.total_associations.toLocaleString()}</td>
-                <td className="py-2.5 px-4 text-right tabular-nums">1</td>
-                <td className="py-2.5 px-4 text-right tabular-nums">3</td>
-                <td className="py-2.5 px-4 text-right tabular-nums">9</td>
-                <td className="py-2.5 px-4 text-right tabular-nums">22</td>
-                <td className="py-2.5 px-4 text-right tabular-nums">{matrix.total_associations.toLocaleString()}</td>
-              </tr>
-              {/* Row 11: Registered Dhabas */}
-              <tr className="hover:bg-slate-50">
-                <td className="py-2.5 px-4 text-slate-800">Registered Highway Dhabas & Rest Points</td>
-                <td className="py-2.5 px-4 text-right tabular-nums font-semibold">{matrix.total_dhabas.toLocaleString()}</td>
-                <td className="py-2.5 px-4 text-right tabular-nums">2</td>
-                <td className="py-2.5 px-4 text-right tabular-nums">7</td>
-                <td className="py-2.5 px-4 text-right tabular-nums">28</td>
-                <td className="py-2.5 px-4 text-right tabular-nums">64</td>
-                <td className="py-2.5 px-4 text-right tabular-nums">{matrix.total_dhabas.toLocaleString()}</td>
-              </tr>
-              {/* Row 12: Registered Puncture Points */}
-              <tr className="hover:bg-slate-50">
-                <td className="py-2.5 px-4 text-slate-800">Registered Puncture & Repair Points</td>
-                <td className="py-2.5 px-4 text-right tabular-nums font-semibold">{matrix.total_punctures.toLocaleString()}</td>
-                <td className="py-2.5 px-4 text-right tabular-nums">1</td>
-                <td className="py-2.5 px-4 text-right tabular-nums">4</td>
-                <td className="py-2.5 px-4 text-right tabular-nums">19</td>
-                <td className="py-2.5 px-4 text-right tabular-nums">36</td>
-                <td className="py-2.5 px-4 text-right tabular-nums">{matrix.total_punctures.toLocaleString()}</td>
-              </tr>
-              {/* Row 13: Attempt for Training & Quiz */}
-              <tr className="hover:bg-slate-50">
-                <td className="py-2.5 px-4 text-slate-800">Attempt for Training & Safety Quiz</td>
-                <td className="py-2.5 px-4 text-right tabular-nums font-semibold">{matrix.quiz_attempts.toLocaleString()}</td>
-                <td className="py-2.5 px-4 text-right tabular-nums">16</td>
-                <td className="py-2.5 px-4 text-right tabular-nums">52</td>
-                <td className="py-2.5 px-4 text-right tabular-nums">210</td>
-                <td className="py-2.5 px-4 text-right tabular-nums">480</td>
-                <td className="py-2.5 px-4 text-right tabular-nums">{matrix.quiz_attempts.toLocaleString()}</td>
-              </tr>
-              {/* Row 14: New Job Posted */}
-              <tr className="hover:bg-slate-50">
-                <td className="py-2.5 px-4 text-slate-800">New Job Posted (All Categories)</td>
-                <td className="py-2.5 px-4 text-right tabular-nums font-semibold">{matrix.total_jobs.toLocaleString()}</td>
-                <td className="py-2.5 px-4 text-right tabular-nums">9</td>
-                <td className="py-2.5 px-4 text-right tabular-nums">34</td>
-                <td className="py-2.5 px-4 text-right tabular-nums">148</td>
-                <td className="py-2.5 px-4 text-right tabular-nums">142</td>
-                <td className="py-2.5 px-4 text-right tabular-nums">{matrix.total_jobs.toLocaleString()}</td>
-              </tr>
-              {/* Row 15: Total Applications Received */}
-              <tr className="hover:bg-slate-50">
-                <td className="py-2.5 px-4 text-slate-800">Total Driver Applications Received</td>
-                <td className="py-2.5 px-4 text-right tabular-nums font-semibold">{matrix.total_applications.toLocaleString()}</td>
-                <td className="py-2.5 px-4 text-right tabular-nums font-medium text-blue-600">{kpis.today_applications}</td>
-                <td className="py-2.5 px-4 text-right tabular-nums">410</td>
-                <td className="py-2.5 px-4 text-right tabular-nums">{kpis.job_applications}</td>
-                <td className="py-2.5 px-4 text-right tabular-nums">2,733</td>
-                <td className="py-2.5 px-4 text-right tabular-nums">{matrix.total_applications.toLocaleString()}</td>
-              </tr>
-              {/* Row 16: Driver Applications Accepted */}
-              <tr className="hover:bg-slate-50">
-                <td className="py-2.5 px-4 text-slate-800">Driver Applications Accepted & Hired</td>
-                <td className="py-2.5 px-4 text-right tabular-nums font-semibold text-emerald-700">{matrix.hired_applications.toLocaleString()}</td>
-                <td className="py-2.5 px-4 text-right tabular-nums font-medium text-emerald-600">6</td>
-                <td className="py-2.5 px-4 text-right tabular-nums text-emerald-600">24</td>
-                <td className="py-2.5 px-4 text-right tabular-nums text-emerald-600">92</td>
-                <td className="py-2.5 px-4 text-right tabular-nums text-emerald-600">284</td>
-                <td className="py-2.5 px-4 text-right tabular-nums text-emerald-700">{matrix.hired_applications.toLocaleString()}</td>
-              </tr>
-              {/* Row 17: Verification Initiated Driver */}
-              <tr className="hover:bg-slate-50">
-                <td className="py-2.5 px-4 text-slate-800">Verification Initiated: Driver Documents</td>
-                <td className="py-2.5 px-4 text-right tabular-nums font-semibold">8,920</td>
-                <td className="py-2.5 px-4 text-right tabular-nums">19</td>
-                <td className="py-2.5 px-4 text-right tabular-nums">68</td>
-                <td className="py-2.5 px-4 text-right tabular-nums">245</td>
-                <td className="py-2.5 px-4 text-right tabular-nums">670</td>
-                <td className="py-2.5 px-4 text-right tabular-nums">8,920</td>
-              </tr>
-              {/* Row 18: Verification Initiated Transporter */}
-              <tr className="hover:bg-slate-50">
-                <td className="py-2.5 px-4 text-slate-800">Verification Initiated: Transporter GST/PAN</td>
-                <td className="py-2.5 px-4 text-right tabular-nums font-semibold">2,110</td>
-                <td className="py-2.5 px-4 text-right tabular-nums">7</td>
-                <td className="py-2.5 px-4 text-right tabular-nums">18</td>
-                <td className="py-2.5 px-4 text-right tabular-nums">62</td>
-                <td className="py-2.5 px-4 text-right tabular-nums">188</td>
-                <td className="py-2.5 px-4 text-right tabular-nums">2,110</td>
-              </tr>
+              {MATRIX_ROWS.map(row => {
+                const tone = ROW_TONES[row.tone] || { tr: 'hover:bg-slate-50 text-slate-800' };
+                const vals = periodMatrix[row.key] || {};
+                return (
+                  <tr key={row.key} className={tone.tr}>
+                    <td className="py-2.5 px-4 flex items-center gap-2">
+                      {tone.dot && <span className={`w-1.5 h-1.5 rounded-full ${tone.dot}`}></span>}
+                      {row.label}
+                    </td>
+                    {periodCols.map(c => (
+                      <td key={c.key} className={`py-2.5 px-4 text-right tabular-nums ${c.key === 'total' ? 'font-semibold' : ''}`}>
+                        {fmtCount(vals[c.key], row.tone === 'money')}
+                      </td>
+                    ))}
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
         {/* Matrix Footer */}
         <div className="p-3.5 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-slate-500">
-          <span>Audit cycle timestamp: <b>{telemetry?.timestamp || '30-Sep-2026 22:01:46 IST'}</b> • Data Source: Production MySQL DB (truckmitr)</span>
+          <span>Audit cycle timestamp: <b>{telemetry?.timestamp || '—'}</b> • Data Source: Production MySQL DB (truckmitr)</span>
         </div>
       </section>
       {/* END: ComprehensiveAuditMatrix */}
@@ -1081,17 +944,22 @@ export default function Dashboard() {
                     <tr>
                       <td className="p-2.5 font-medium text-emerald-700">Connected Calls</td>
                       <td className="p-2.5 text-center font-mono text-emerald-700 font-bold">{calls.connected.toLocaleString()}</td>
-                      <td className="p-2.5 text-right font-bold text-emerald-700">{calls.connect_rate}</td>
+                      <td className="p-2.5 text-right font-bold text-emerald-700">{callPct(calls.connected)}</td>
                     </tr>
                     <tr>
                       <td className="p-2.5 font-medium text-amber-700">Not Connected / Busy</td>
                       <td className="p-2.5 text-center font-mono text-amber-700 font-bold">{calls.not_connected.toLocaleString()}</td>
-                      <td className="p-2.5 text-right font-bold text-amber-700">61.7%</td>
+                      <td className="p-2.5 text-right font-bold text-amber-700">{callPct(calls.not_connected)}</td>
                     </tr>
                     <tr>
                       <td className="p-2.5 font-medium text-blue-700">Callback Later</td>
                       <td className="p-2.5 text-center font-mono text-blue-700 font-bold">{calls.callback.toLocaleString()}</td>
-                      <td className="p-2.5 text-right font-bold text-blue-600">4.7%</td>
+                      <td className="p-2.5 text-right font-bold text-blue-600">{callPct(calls.callback)}</td>
+                    </tr>
+                    <tr>
+                      <td className="p-2.5 font-medium text-slate-600">Pending / No Status</td>
+                      <td className="p-2.5 text-center font-mono text-slate-600 font-bold">{calls.no_status.toLocaleString()}</td>
+                      <td className="p-2.5 text-right font-bold text-slate-600">{callPct(calls.no_status)}</td>
                     </tr>
                   </tbody>
                 </table>

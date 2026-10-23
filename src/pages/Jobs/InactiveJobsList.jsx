@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
+import ListPager from '../../components/ListPager';
 import {
   Briefcase,
   Search,
@@ -32,62 +33,19 @@ export default function InactiveJobsList() {
     setTimeout(() => setCopiedId(null), 2000);
   };
 
-  const [inactiveJobs, setInactiveJobs] = useState([
-    {
-      id: 201,
-      job_id: 'TMJB01860',
-      tmid: 'TM2608MHTR319200',
-      assigned_to: 'Angad',
-      contact_name: 'Venkatesh Roadlines',
-      mobile: '9765412300',
-      title: '🚚 महिंद्रा बोलेरो पिकअप ड्राइवर - पुणे एवं पिंपरी',
-      compensation: '💰 ₹18,000 + ओवर-टाइम',
-      vehicle_type: 'Light Commercial (LCV)',
-      license: 'LMV',
-      location: 'Maharashtra',
-      reason: 'Temporarily Paused by Employer',
-      deactivated_date: '02 Oct 2026',
-      status: 'Inactive'
-    },
-    {
-      id: 202,
-      job_id: 'TMJB01855',
-      tmid: 'TM2608DLTR310022',
-      assigned_to: 'Chandarbhan',
-      contact_name: 'North-East Freight',
-      mobile: '9810998877',
-      title: '🚚 12 चक्का कंटेनर ड्राइवर - दिल्ली से गुवाहाटी',
-      compensation: '💰 ₹32,000 + ट्रिप बोनस',
-      vehicle_type: 'Container Trucks',
-      license: 'HMV',
-      location: 'Delhi',
-      reason: 'Quota Reached',
-      deactivated_date: '28 Sep 2026',
-      status: 'Inactive'
-    },
-    {
-      id: 203,
-      job_id: 'TMJB01840',
-      tmid: 'TM2607RJTR290111',
-      assigned_to: 'Aayushi Verma',
-      contact_name: 'Jaipur Super Golden',
-      mobile: '9414223344',
-      title: '🚚 20 फीट कैंटर ड्राइवर - अजमेर रोड डिस्ट्रीब्यूशन',
-      compensation: '💰 ₹21,000 + खाना भत्ता',
-      vehicle_type: 'Light Commercial (LCV)',
-      license: 'HMV',
-      location: 'Rajasthan',
-      reason: 'Driver Hired Offline',
-      deactivated_date: '24 Sep 2026',
-      status: 'Inactive'
-    }
-  ]);
+  const [inactiveJobs, setInactiveJobs] = useState([]);
+  const [pageSize, setPageSize] = useState(20);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [meta, setMeta] = useState({ total: 0, last_page: 1 });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchInactive = async () => {
+      setLoading(true);
       try {
-        const res = await api.get('/admin/jobs-brief', { params: { status: 'inactive', per_page: 50 } });
-        if (res.data && res.data.status === 'success' && Array.isArray(res.data.data) && res.data.data.length > 0) {
+        const res = await api.get('/admin/jobs-brief', { params: { status: 'inactive', per_page: pageSize, page: currentPage } });
+        if (res.data && res.data.status === 'success' && Array.isArray(res.data.data)) {
+          setMeta({ total: res.data.total || 0, last_page: res.data.last_page || 1 });
           const mapped = res.data.data.map(j => ({
             id: j.id,
             job_id: j.job_id,
@@ -107,11 +65,13 @@ export default function InactiveJobsList() {
           setInactiveJobs(mapped);
         }
       } catch {
-        // Fallback in initial state
+        setInactiveJobs([]);
+      } finally {
+        setLoading(false);
       }
     };
     fetchInactive();
-  }, []);
+  }, [currentPage, pageSize]);
 
   const handleActivateJob = async (job) => {
     try {
@@ -150,7 +110,7 @@ export default function InactiveJobsList() {
           <div className="flex items-center gap-3">
             <h1 className="text-2xl font-bold tracking-tight text-slate-900">Inactive Jobs Queue</h1>
             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200">
-              12 Inactive Postings
+              {meta.total.toLocaleString('en-IN')} Inactive Postings
             </span>
           </div>
           <p className="text-sm text-slate-500 mt-1">
@@ -194,7 +154,7 @@ export default function InactiveJobsList() {
             <tbody className="divide-y divide-slate-200">
               {filtered.map((job, idx) => (
                 <tr key={job.id} className="hover:bg-slate-50/80 transition">
-                  <td className="px-3.5 py-3 text-center text-slate-500 font-medium">{idx + 1}</td>
+                  <td className="px-3.5 py-3 text-center text-slate-500 font-medium">{(currentPage - 1) * pageSize + idx + 1}</td>
                   <td className="px-3.5 py-3 font-semibold text-slate-600 font-mono">{job.job_id}</td>
                   <td className="px-3.5 py-3 font-mono text-slate-600 text-[11px]">{job.tmid}</td>
                   <td className="px-3.5 py-3 font-medium text-slate-900">{job.contact_name}</td>
@@ -242,9 +202,22 @@ export default function InactiveJobsList() {
                   </td>
                 </tr>
               ))}
+              {!filtered.length && (
+                <tr>
+                  <td colSpan={12} className="px-4 py-12 text-center text-sm text-slate-400">{loading ? 'Loading…' : 'No inactive jobs found'}</td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
+        <ListPager
+          page={currentPage}
+          lastPage={meta.last_page}
+          total={meta.total}
+          pageSize={pageSize}
+          onPage={setCurrentPage}
+          onPageSize={(n) => { setPageSize(n); setCurrentPage(1); }}
+        />
       </div>
     </div>
   );

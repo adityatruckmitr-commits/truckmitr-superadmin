@@ -26,6 +26,7 @@ import {
   TrendingUp,
   Award
 } from 'lucide-react';
+import PageJump from '../../components/PageJump';
 
 export default function SurveysList() {
   const navigate = useNavigate();
@@ -302,19 +303,19 @@ export default function SurveysList() {
           description: item.description,
           roles: Array.isArray(item.roles) && item.roles.length > 0 ? item.roles : ['Driver'],
           status: (item.status || 'active').charAt(0).toUpperCase() + (item.status || 'active').slice(1),
-          start_date: item.start_date ? new Date(item.start_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '01 Oct 2026',
-          end_date: item.end_date ? new Date(item.end_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '31 Oct 2026',
-          questions_count: item.questions_count || 1,
-          responses_count: item.responses_count || (Math.floor(Math.random() * 2000) + 100),
+          start_date: item.start_date ? new Date(item.start_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '—',
+          end_date: item.end_date ? new Date(item.end_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '—',
+          questions_count: item.questions_count || 0,
+          responses_count: item.responses_count || 0,
           featured: item.id === 16 || item.title.includes('ग्रीनलाइन')
         }));
         setSurveys(formatted);
       } else {
-        setSurveys(defaultSurveysData);
+        setSurveys([]);
       }
     } catch (err) {
       console.warn('API error, using static default records:', err);
-      setSurveys(defaultSurveysData);
+      setSurveys([]);
     } finally {
       setLoading(false);
     }
@@ -773,6 +774,7 @@ export default function SurveysList() {
             >
               <ChevronRight className="w-4 h-4" />
             </button>
+            <PageJump page={currentPage} totalPages={totalPages} onGo={setCurrentPage} />
           </nav>
         </div>
       </div>

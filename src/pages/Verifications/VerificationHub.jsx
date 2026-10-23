@@ -33,6 +33,7 @@ import {
   ShieldAlert,
   Calendar
 } from 'lucide-react';
+import PageJump from '../../components/PageJump';
 
 export default function VerificationHub() {
   const location = useLocation();
@@ -117,270 +118,22 @@ export default function VerificationHub() {
   // ==========================================
 
   // Tab 1: User Verification Dataset (871)
-  const [userOverviewList, setUserOverviewList] = useState([
-    {
-      id: 1,
-      tmid: 'TM2610RJDR410776',
-      name: 'SHIVPAL',
-      mobile: '9549636675',
-      email: '',
-      role: 'Driver',
-      subscription: 'Trusted',
-      subscription_date: '09 Oct 2026',
-      license_check: { status: 'Verified', date: '09 Oct 2026' },
-      pan_status: { status: 'Verified', date: '09 Oct 2026' },
-      face_match: { status: 'Not Verified', date: '' },
-      court_check: { status: 'Not Verified', date: '' },
-      digital_address: { status: 'Not Verified', date: '' }
-    },
-    {
-      id: 2,
-      tmid: 'TM2610WBDR410167',
-      name: 'BAJAUL HAQUE',
-      mobile: '6294313895',
-      email: 'bajaulhaque352@gmail.com',
-      role: 'Driver',
-      subscription: 'Verified',
-      subscription_date: '07 Oct 2026',
-      license_check: { status: 'Verified', date: '07 Oct 2026' },
-      pan_status: { status: 'Verified', date: '07 Oct 2026' },
-      face_match: { status: 'Not Verified', date: '' },
-      court_check: { status: 'Not Verified', date: '' },
-      digital_address: { status: 'Not Verified', date: '' }
-    },
-    {
-      id: 3,
-      tmid: 'TM2610UPDR410065',
-      name: 'GudduSing Chauhan',
-      mobile: '7069167851',
-      email: 'guddusinghchohan12@gmail.com',
-      role: 'Driver',
-      subscription: 'Trusted',
-      subscription_date: '07 Oct 2026',
-      license_check: { status: 'Verified', date: '07 Oct 2026' },
-      pan_status: { status: 'Verified', date: '07 Oct 2026' },
-      face_match: { status: 'Verified', date: '07 Oct 2026' },
-      court_check: { status: 'Initiated', date: '07 Oct 2026' },
-      digital_address: { status: 'Initiated', date: '08 Oct 2026' }
-    },
-    {
-      id: 4,
-      tmid: 'TM2610MPDR407844',
-      name: 'Shiva soni',
-      mobile: '8269875307',
-      email: 'shivasoni48181@gmail.com',
-      role: 'Driver',
-      subscription: 'Trusted',
-      subscription_date: '06 Oct 2026',
-      license_check: { status: 'Verified', date: '06 Oct 2026' },
-      pan_status: { status: 'Verified', date: '06 Oct 2026' },
-      face_match: { status: 'Verified', date: '06 Oct 2026' },
-      court_check: { status: 'Initiated', date: '06 Oct 2026' },
-      digital_address: { status: 'Initiated', date: '06 Oct 2026' }
-    },
-    {
-      id: 5,
-      tmid: 'TM2609RJDR406914',
-      name: 'Rakesh bhagora',
-      mobile: '8302468575',
-      email: 'rakeshbhagora65@gmail.com',
-      role: 'Driver',
-      subscription: 'Trusted',
-      subscription_date: '29 Sep 2026',
-      license_check: { status: 'Verified', date: '29 Sep 2026' },
-      pan_status: { status: 'Verified', date: '29 Sep 2026' },
-      face_match: { status: 'Verified', date: '29 Sep 2026' },
-      court_check: { status: 'Verified', date: '07 Oct 2026' },
-      digital_address: { status: 'Initiated', date: '29 Sep 2026' }
-    },
-    {
-      id: 6,
-      tmid: 'TM2609DLTR405520',
-      name: 'Rajesh Sharma Logistics',
-      mobile: '9811009988',
-      email: 'rajesh.logistics@gmail.com',
-      role: 'Transporter',
-      subscription: 'Trusted',
-      subscription_date: '25 Sep 2026',
-      license_check: { status: 'Verified', date: '25 Sep 2026' },
-      pan_status: { status: 'Verified', date: '25 Sep 2026' },
-      face_match: { status: 'Verified', date: '25 Sep 2026' },
-      court_check: { status: 'Verified', date: '26 Sep 2026' },
-      digital_address: { status: 'Verified', date: '27 Sep 2026' }
-    }
-  ]);
+  const [userOverviewList, setUserOverviewList] = useState([]);
 
   // Tab 2: Court Verification Dataset (130)
-  const [courtVerificationList, setCourtVerificationList] = useState([
-    {
-      id: 1,
-      tmid: 'TM2507BRDR01751',
-      name: 'nandkishor',
-      mobile: '9931068241',
-      subscription: 'Trusted',
-      subscription_datetime: '23 Jun 2026, 09:59 AM',
-      court_status: 'Green (Clear)',
-      report_datetime: '21 Sep 2026, 05:01 PM',
-      court_summary: 'No active criminal FIR or pending court warrant found across eCourts database.',
-      cnr_records: 0
-    },
-    {
-      id: 2,
-      tmid: 'TM2603UPDR40197',
-      name: 'Rohit Kushwaha',
-      mobile: '9118487093',
-      subscription: 'Trusted',
-      subscription_datetime: '09 Oct 2026, 09:40 AM',
-      court_status: 'Initiated',
-      report_datetime: '-- In Progress --',
-      court_summary: 'eCourts query dispatched to Uttar Pradesh High Court & District Courts.',
-      cnr_records: 0
-    },
-    {
-      id: 3,
-      tmid: 'TM2605UPDR48903',
-      name: 'Patanjali Rangnath',
-      mobile: '8173045902',
-      subscription: 'Trusted',
-      subscription_datetime: '03 Jul 2026, 09:18 AM',
-      court_status: 'Red (Record Found)',
-      report_datetime: '07 Oct 2026, 04:21 PM',
-      court_summary: '1 Case under Motor Vehicles Act (Section 279/337) registered at Lucknow District Court.',
-      cnr_records: 1
-    },
-    {
-      id: 4,
-      tmid: 'TM2507RJDR01862',
-      name: 'Manoj sangwa',
-      mobile: '9549520052',
-      subscription: 'Trusted',
-      subscription_datetime: '21 Jan 2026, 01:16 PM',
-      court_status: 'Green (Clear)',
-      report_datetime: '21 Jan 2026, 02:05 PM',
-      court_summary: 'Clear record. No pending warrants or litigations.',
-      cnr_records: 0
-    }
-  ]);
+  const [courtVerificationList, setCourtVerificationList] = useState([]);
 
   // Tab 3: Court Verification by Transporter (5)
-  const [courtTransporterList, setCourtTransporterList] = useState([
-    {
-      id: 1,
-      transporter_tmid: 'TM2603DLTR40047',
-      transporter_name: 'Rajkumar yadav',
-      transporter_mobile: '9312122567',
-      driver_name: 'Nilesh rai',
-      driver_mobile: '9773970573',
-      status: 'Pending',
-      report_datetime: '27 May 2026, 02:05 PM'
-    },
-    {
-      id: 2,
-      transporter_tmid: 'TM2603DLTR40047',
-      transporter_name: 'Rajkumar yadav',
-      transporter_mobile: '9312122567',
-      driver_name: 'Bhagirath Saini',
-      driver_mobile: '9680237631',
-      status: 'Pending',
-      report_datetime: '27 May 2026, 02:05 PM'
-    },
-    {
-      id: 3,
-      transporter_tmid: 'TM2604MHTR41580',
-      transporter_name: 'Prabhat Rajput',
-      transporter_mobile: '8262894976',
-      driver_name: 'Shubham Meshram',
-      driver_mobile: '9529080074',
-      status: 'Pending',
-      report_datetime: '26 May 2026, 12:01 PM'
-    }
-  ]);
+  const [courtTransporterList, setCourtTransporterList] = useState([]);
 
   // Tab 4: Digital Address Verification (DAV) (141)
-  const [digitalAddressList, setDigitalAddressList] = useState([
-    {
-      id: 1,
-      driver_name: 'Rohit Kushwaha',
-      driver_mobile: '9118487093',
-      address_submitted: 'Address: Jangal shankarpur, Maharajganj, Uttar Pradesh - 273303',
-      status: 'Pending',
-      submitted_on: '09 Oct 2026',
-      geo_coordinates: '27.1472° N, 83.5614° E',
-      post_office: 'Jangal Shankarpur SO'
-    },
-    {
-      id: 2,
-      driver_name: 'Rajnesh Prajapati',
-      driver_mobile: '7068142326',
-      address_submitted: 'Sikrigari sikrideeh bujurg gorakhpur Uttar Pradesh - 273001',
-      status: 'Pending',
-      submitted_on: '09 Oct 2026',
-      geo_coordinates: '26.7606° N, 83.3732° E',
-      post_office: 'Gorakhpur HO'
-    },
-    {
-      id: 3,
-      driver_name: 'Shiva soni',
-      driver_mobile: '8269875307',
-      address_submitted: 'Purani police line Sagar Madhya Pradesh - 470001',
-      status: 'Pending',
-      submitted_on: '06 Oct 2026',
-      geo_coordinates: '23.8388° N, 78.7378° E',
-      post_office: 'Sagar Cantt SO'
-    }
-  ]);
+  const [digitalAddressList, setDigitalAddressList] = useState([]);
 
   // Tab 5: DAV by Transporter (12)
-  const [davTransporterList, setDavTransporterList] = useState([
-    {
-      id: 1,
-      transporter_name: 'GudduSing Chauhan',
-      transporter_mobile: '7069167851',
-      driver_name: 'GudduSing Chauhan',
-      driver_mobile: '7069167851',
-      address_submitted: 'Gram mohari post Jafarganj dist Fatehpur Uttar Pradesh - 212657',
-      status: 'Pending',
-      submitted_on: '08 Oct 2026'
-    },
-    {
-      id: 2,
-      transporter_name: 'Firoz Khan',
-      transporter_mobile: '9949839289',
-      driver_name: 'Firoz Khan',
-      driver_mobile: '9949839289',
-      address_submitted: 'S/O Doulath Khan, 2 3 20/3, khammam Telangana - 507001',
-      status: 'Pending',
-      submitted_on: '06 Oct 2026'
-    }
-  ]);
+  const [davTransporterList, setDavTransporterList] = useState([]);
 
   // Tab 6: Physical Verification by Transporter (2)
-  const [physicalVerificationList, setPhysicalVerificationList] = useState([
-    {
-      id: 1,
-      transporter_name: 'K Srinivasa Rao',
-      transporter_mobile: '8184971212',
-      driver_name: 'Rohan Ravidas',
-      driver_mobile: '8522803112',
-      driver_email: 'nsealingservices@gmail.com',
-      id_type: 'Driving Licence',
-      id_badge: 'bg-blue-50 text-blue-700 border-blue-200',
-      status: 'Pending',
-      submitted_on: '04 Jul 2026'
-    },
-    {
-      id: 2,
-      transporter_name: 'Tech team',
-      transporter_mobile: '9540676147',
-      driver_name: 'Testing1',
-      driver_mobile: '9767979949',
-      driver_email: 'sourabh.markletech@gmail.com',
-      id_type: 'Voter ID Card',
-      id_badge: 'bg-purple-50 text-purple-700 border-purple-200',
-      status: 'Pending',
-      submitted_on: '18 May 2026'
-    }
-  ]);
+  const [physicalVerificationList, setPhysicalVerificationList] = useState([]);
 
   // Fetch Tab Data from server API
   const fetchTabData = async () => {
@@ -413,8 +166,10 @@ export default function VerificationHub() {
         const res = await api.get(endpoint, { params });
         if (res.data?.status && Array.isArray(res.data.data)) {
           const items = res.data.data;
-          setTotalRecords(res.data.total || items.length);
-          setTotalPages(res.data.last_page || Math.ceil((res.data.total || items.length) / pageSize) || 1);
+          // the verification APIs send their totals in res.data.pagination
+          const meta = res.data.pagination || res.data;
+          setTotalRecords(meta.total || items.length);
+          setTotalPages(meta.last_page || Math.ceil((meta.total || items.length) / pageSize) || 1);
 
           if (activeTab === 'user-overview') setUserOverviewList(items);
           else if (activeTab === 'court-verification') setCourtVerificationList(items);
@@ -567,7 +322,7 @@ export default function VerificationHub() {
               Driver & Transporter Verification Hub
             </h1>
             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200">
-              {tabCounts[activeTab] || 871} Records
+              {tabCounts[activeTab] || 0} Records
             </span>
             <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -616,7 +371,7 @@ export default function VerificationHub() {
                 activeTab === 'user-overview' ? 'bg-blue-700 text-white' : 'bg-slate-100 text-slate-600'
               }`}
             >
-              {tabCounts['user-overview'] || 877}
+              {tabCounts['user-overview'] || 0}
             </span>
           </button>
 
@@ -637,7 +392,7 @@ export default function VerificationHub() {
                 activeTab === 'court-verification' ? 'bg-blue-700 text-white' : 'bg-slate-100 text-slate-600'
               }`}
             >
-              {tabCounts['court-verification'] || 127}
+              {tabCounts['court-verification'] || 0}
             </span>
           </button>
 
@@ -658,7 +413,7 @@ export default function VerificationHub() {
                 activeTab === 'court-transporter' ? 'bg-blue-700 text-white' : 'bg-slate-100 text-slate-600'
               }`}
             >
-              {tabCounts['court-transporter'] || 5}
+              {tabCounts['court-transporter'] || 0}
             </span>
           </button>
 
@@ -679,7 +434,7 @@ export default function VerificationHub() {
                 activeTab === 'digital-address' ? 'bg-blue-700 text-white' : 'bg-slate-100 text-slate-600'
               }`}
             >
-              {tabCounts['digital-address'] || 141}
+              {tabCounts['digital-address'] || 0}
             </span>
           </button>
 
@@ -700,7 +455,7 @@ export default function VerificationHub() {
                 activeTab === 'dav-transporter' ? 'bg-blue-700 text-white' : 'bg-slate-100 text-slate-600'
               }`}
             >
-              {tabCounts['dav-transporter'] || 11}
+              {tabCounts['dav-transporter'] || 0}
             </span>
           </button>
 
@@ -721,7 +476,7 @@ export default function VerificationHub() {
                 activeTab === 'physical-verification' ? 'bg-blue-700 text-white' : 'bg-slate-100 text-slate-600'
               }`}
             >
-              {tabCounts['physical-verification'] || 2}
+              {tabCounts['physical-verification'] || 0}
             </span>
           </button>
         </nav>
@@ -1253,6 +1008,7 @@ export default function VerificationHub() {
               <ChevronRight className="w-4 h-4" />
             </button>
           </div>
+          <PageJump page={currentPage} totalPages={totalPages} onGo={setCurrentPage} />
         </div>
         {/* END: Table Pagination Footer */}
       </div>

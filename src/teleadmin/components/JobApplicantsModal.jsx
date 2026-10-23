@@ -1,3 +1,4 @@
+import PageJump from '../../components/PageJump';
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -278,6 +279,7 @@ const JobApplicantsModal = ({ isOpen, onClose, jobId, jobTitle, type = null }) =
                                         >
                                             <ChevronRight className="w-5 h-5 text-slate-600" />
                                         </button>
+                                        <PageJump page={currentPage} totalPages={pagination.last_page} onGo={setCurrentPage} />
                                     </div>
                                 )}
                             </div>

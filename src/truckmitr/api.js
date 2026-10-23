@@ -23,7 +23,7 @@ tm.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       ['tm_admin_token', 'tm_admin_user', 'token', 'user'].forEach((key) => localStorage.removeItem(key));
-      window.location.href = '/login';
+      window.location.href = '/login?expired=1';
     }
     return Promise.reject(error);
   }
@@ -39,7 +39,10 @@ export async function tmView(path, params) {
 const appendValue = (fd, key, value) => {
   if (value === undefined || value === null) return;
   if (Array.isArray(value)) {
-    value.forEach((item) => appendValue(fd, `${key}[]`, item));
+    // rows of fields (benefits[0][hindi]) keep their index; plain lists are key[]
+    value.forEach((item, i) => appendValue(fd, item && typeof item === 'object' && !(item instanceof Blob) ? `${key}[${i}]` : `${key}[]`, item));
+  } else if (typeof value === 'object' && !(value instanceof Blob)) {
+    Object.entries(value).forEach(([sub, item]) => appendValue(fd, `${key}[${sub}]`, item));
   } else if (typeof value === 'boolean') {
     fd.append(key, value ? '1' : '0');
   } else {
@@ -112,6 +115,31 @@ export async function tmDownload(path, params, fallbackName = 'export.xlsx', met
   link.click();
   link.remove();
   URL.revokeObjectURL(url);
+}
+
+/**
+ * JPEG data URL of a video's frame at 1 second, 320x180 - the "thumbnail" the truckmitr.com banner and
+ * popup forms capture in the browser before upload.
+ */
+export function videoThumbnail(file) {
+  return new Promise((resolve) => {
+    if (!(file instanceof Blob)) return resolve(undefined);
+    const video = document.createElement('video');
+    const url = URL.createObjectURL(file);
+    video.src = url;
+    video.muted = true;
+    video.playsInline = true;
+    const done = (value) => { URL.revokeObjectURL(url); resolve(value); };
+    video.addEventListener('loadeddata', () => { video.currentTime = Math.min(1, video.duration || 1); });
+    video.addEventListener('seeked', () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = 320;
+      canvas.height = 180;
+      canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+      done(canvas.toDataURL('image/jpeg'));
+    });
+    video.addEventListener('error', () => done(undefined));
+  });
 }
 
 /** URL of a file truckmitr.com serves from public/ (url('public/...') in Blade). */

@@ -39,9 +39,12 @@ const GROUP_PREFIXES = {
   Jobs: ['/job', '/active-job', '/expired-job', '/inactive-job', '/pending', '/master-job'],
   'Verification Hub': ['/verification', '/court-verification', '/dav-verification', '/physical-verification'],
   'Team Members': ['/members', '/team-members', '/department'],
-  'Social & Communication': ['/whatsapp', '/blog', '/add-blog', '/banner', '/create-banner', '/quiz', '/driver-video', '/video', '/social'],
+  Blogs: ['/blog', '/add-blog', '/social/blog'],
+  Transporter: ['/transporter/'],
+  'Driver Management': ['/driver-list/'],
+  'Truck Listings': ['/truck-list/'],
   Teleadmin: ['/teleadmin', '/subadmin', '/pipeline-drivers', '/driver-bank', '/assign-leads', '/add-new-lead', '/social-leads-list'],
-  'Notification Tracking': ['/notification'],
+  Notifications: ['/notification'],
 };
 
 const matches = (pathname, pattern) =>
@@ -52,7 +55,7 @@ export const isLinkActive = (link, location) => {
   if (link.exact) return pathname === link.path;
   if (pathname === link.path) return true;
   if ((LINK_ALIASES[link.path] || []).some((alias) => matches(pathname, alias))) return true;
-  if (link.prefix && pathname.startsWith(link.path)) return true;
+  if (link.prefix && pathname.startsWith(`${link.path}/`)) return true;
   if (link.path === '/notifications/list') return search.includes('tab=list');
   if (link.path === '/notifications/analytics') return search.includes('tab=analytics');
   return false;
@@ -64,7 +67,7 @@ export const isGroupActive = (group, location) => {
   return group.subItems.some((child) =>
     child.subItems
       ? isGroupActive(child, location)
-      : isLinkActive(child, location) || (child.path !== '/' && location.pathname.startsWith(child.path.split('?')[0]))
+      : isLinkActive(child, location) || (child.path !== '/' && location.pathname.startsWith(`${child.path.split('?')[0]}/`))
   );
 };
 

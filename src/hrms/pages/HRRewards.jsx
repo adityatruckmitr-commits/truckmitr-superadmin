@@ -1,3 +1,4 @@
+import PageJump from '../../components/PageJump';
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from '@hrms/router'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -387,6 +388,7 @@ export default function HRRewards() {
                         <button key={page} onClick={() => setCurrentPage(page)} aria-current={page === safePage ? 'page' : undefined} className={cx('h-7 w-7 rounded-sm text-xs font-semibold transition-colors', page === safePage ? 'bg-blue-600 text-white' : 'border border-gray-200 bg-white text-gray-600 hover:bg-gray-100')}>{page}</button>
                       ))}
                       <button onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))} disabled={safePage === totalPages} className="inline-flex h-7 w-7 items-center justify-center rounded-sm border border-gray-200 bg-white text-gray-600 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"><ChevronRight className="h-3.5 w-3.5" /></button>
+                      <PageJump page={safePage} totalPages={totalPages} onGo={setCurrentPage} />
                     </div>
                   )}
                 </div>

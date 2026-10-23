@@ -1,3 +1,4 @@
+import PageJump from '../../components/PageJump';
 import React, { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from '@teleadmin/router';
 import driverKiAwazApi from '../services/api/driverKiAwazApi';
@@ -659,6 +660,7 @@ export default function DriverKiAwazPosts() {
               >
                 <ChevronRight className="w-3.5 h-3.5" />
               </button>
+              <PageJump page={pagination.current_page} totalPages={pagination.last_page} onGo={handlePageChange} />
             </div>
           </div>
         )}

@@ -44,7 +44,21 @@ import {
   UserPlus,
   Laptop,
   CreditCard,
-  Truck
+  Truck,
+  StickyNote,
+  Smartphone,
+  MessageSquareText,
+  PhoneCall,
+  Share2,
+  Gift,
+  Wallet,
+  UserCog,
+  Inbox,
+  PhoneIncoming,
+  GraduationCap,
+  Film,
+  BookOpen,
+  Utensils
 } from 'lucide-react';
 
 const HRMS_GROUP_ICONS = {
@@ -165,6 +179,7 @@ export default function AdminLayout() {
         {
           label: 'Admin',
           icon: LayoutDashboard,
+          // Same menu, in the same order, as the truckmitr.com admin panel (src/truckmitr serves its screens)
           subItems: [
             { label: 'Dashboard', path: '/', icon: Home, exact: true },
             { label: 'Performance Report', path: '/performance', icon: BarChart3, prefix: true },
@@ -172,7 +187,7 @@ export default function AdminLayout() {
             { label: 'Matchmaking', path: '/matchmaking', icon: GitCompare, prefix: true },
             { label: 'Update Revenue', path: '/revenue', icon: IndianRupee, prefix: true, badge: 'MTD', badgeClass: 'bg-emerald-50 text-emerald-700 border border-emerald-200' },
             { label: 'Expenses', path: '/expenses', icon: Receipt, prefix: true },
-            { label: 'User Notes', path: '/user-notes', icon: FileText, prefix: true },
+            { label: 'User Notes', path: '/user-notes', icon: StickyNote, prefix: true },
             { label: 'Driver Fulfillment', path: '/driver-fulfillment', icon: ShieldCheck, prefix: true },
             {
               label: 'OEM Brand',
@@ -198,23 +213,22 @@ export default function AdminLayout() {
               icon: Image,
               subItems: [
                 { label: 'View Banners', path: '/banners' },
-                { label: 'Mobile Banners', path: '/banners/mobile' },
               ]
             },
-            { label: 'Mobile Popups', path: '/popups/mobile', icon: MessageSquare },
-            { label: 'Popup Banners', path: '/banners/popups', icon: Sparkles },
+            { label: 'Mobile Popups', path: '/mobile-popups', icon: Smartphone, prefix: true },
+            { label: 'Popup Banners', path: '/popup-banners', icon: Sparkles, prefix: true },
             {
               label: 'Verification Hub',
               icon: ShieldCheck,
               subItems: [
-                { label: 'User Overview', path: '/verifications', badge: String(verificationCounts['user-overview'] || 877), badgeClass: 'bg-white px-1.5 py-0.2 rounded-full border border-blue-200 text-blue-700 font-bold' },
+                { label: 'User Overview', path: '/verifications', badge: String(verificationCounts['user-overview'] || 0), badgeClass: 'bg-white px-1.5 py-0.2 rounded-full border border-blue-200 text-blue-700 font-bold' },
                 { label: 'ID Check', path: '/id-check' },
                 { label: 'RC Check', path: '/rc-verifications' },
-                { label: 'Court Verifications', path: '/court-verifications', badge: String(verificationCounts['court-verification'] || 127), badgeClass: 'text-slate-500 font-semibold' },
-                { label: 'DAV', path: '/dav-verifications', badge: String(verificationCounts['digital-address'] || 141), badgeClass: 'text-slate-500 font-semibold' },
-                { label: 'Court Verif. (Transporter)', path: '/court-verifications-by-transporter', badge: String(verificationCounts['court-transporter'] || 5), badgeClass: 'text-slate-500 font-semibold' },
-                { label: 'DAV (Transporter)', path: '/dav-verifications-by-transporter', badge: String(verificationCounts['dav-transporter'] || 11), badgeClass: 'text-slate-500 font-semibold' },
-                { label: 'Physical Verif. (Transporter)', path: '/physical-verifications-by-transporter', badge: String(verificationCounts['physical-verification'] || 2), badgeClass: 'text-slate-500 font-semibold' },
+                { label: 'Court Verifications', path: '/court-verifications', badge: String(verificationCounts['court-verification'] || 0), badgeClass: 'text-slate-500 font-semibold' },
+                { label: 'DAV', path: '/dav-verifications', badge: String(verificationCounts['digital-address'] || 0), badgeClass: 'text-slate-500 font-semibold' },
+                { label: 'Court Verif. (Transporter)', path: '/court-verifications-by-transporter', badge: String(verificationCounts['court-transporter'] || 0), badgeClass: 'text-slate-500 font-semibold' },
+                { label: 'DAV (Transporter)', path: '/dav-verifications-by-transporter', badge: String(verificationCounts['dav-transporter'] || 0), badgeClass: 'text-slate-500 font-semibold' },
+                { label: 'Physical Verif. (Transporter)', path: '/physical-verifications-by-transporter', badge: String(verificationCounts['physical-verification'] || 0), badgeClass: 'text-slate-500 font-semibold' },
               ]
             },
             {
@@ -233,14 +247,70 @@ export default function AdminLayout() {
                 { label: 'Create Subscription Plan', path: '/subscriptionplans/create' },
               ]
             },
+            { label: 'Popup Messages', path: '/popup-messages', icon: MessageSquareText, prefix: true },
             {
-              label: 'Notification Tracking',
+              label: 'Call Logs Tracking',
+              icon: PhoneCall,
+              subItems: [
+                { label: 'Transporters', path: '/call-logs/transporters' },
+                { label: 'Drivers', path: '/call-logs/drivers' },
+              ]
+            },
+            { label: 'Referral Management', path: '/referrals', icon: Share2, prefix: true },
+            { label: 'Referral & Earn', path: '/referral-earn', icon: Gift, prefix: true },
+            { label: 'Payment', path: '/payments-reward', icon: Wallet, prefix: true },
+            { label: 'Callback Requests', path: '/callback-requests', icon: Phone, prefix: true },
+            {
+              label: 'Payments',
+              icon: Wallet,
+              subItems: [
+                { label: 'View Payments', path: '/payments' },
+                { label: 'View Failed Payments', path: '/payments/failed' },
+              ]
+            },
+            {
+              label: 'Notifications',
               icon: Bell,
               subItems: [
-                { label: 'Overview', path: '/notifications' },
-                { label: 'Notification List', path: '/notifications/list' },
-                { label: 'Analytics', path: '/notifications/analytics' },
-                { label: 'Broadcast & Push', path: '/notifications/create' }
+                { label: 'View Notifications', path: '/notifications' },
+                { label: 'Send Notification', path: '/notifications/create' }
+              ]
+            },
+            {
+              label: 'Subscription',
+              icon: CreditCard,
+              subItems: [
+                { label: 'View Subscriptions', path: '/subscription' },
+              ]
+            },
+            {
+              label: 'Users',
+              icon: UserCog,
+              subItems: [
+                { label: 'View Users', path: '/users' },
+              ]
+            },
+            {
+              label: 'Career',
+              icon: Briefcase,
+              subItems: [
+                { label: 'Career List', path: '/career' },
+              ]
+            },
+            {
+              label: 'Inquiry',
+              icon: Inbox,
+              subItems: [
+                { label: 'Inquiry List', path: '/inquiry' },
+              ]
+            },
+            {
+              label: 'Truck Listings',
+              icon: Truck,
+              subItems: [
+                { label: 'Vehicle Type', path: '/oem/filters?tab=vehicle-type' },
+                { label: 'Add Truck', path: '/add-truck' },
+                { label: 'Truck List', path: '/truck-list' },
               ]
             },
             {
@@ -253,6 +323,7 @@ export default function AdminLayout() {
                 { label: 'Driver Hiring', path: '/driver-hiring' },
               ]
             },
+            { label: 'Leads', path: '/leads', icon: PhoneIncoming, prefix: true },
             {
               label: 'Transporter',
               icon: Building2,
@@ -263,35 +334,75 @@ export default function AdminLayout() {
               ]
             },
             {
+              label: 'DTS',
+              icon: GraduationCap,
+              subItems: [
+                { label: 'DTS List', path: '/dts' },
+              ]
+            },
+            {
               label: 'Jobs',
               icon: Briefcase,
               subItems: [
                 { label: 'Job List', path: '/jobs' },
+                { label: 'GreenLine Pending Jobs', path: '/greenline-pending-jobs' },
+                { label: 'GreenLine Submitted Jobs', path: '/greenline-submitted-jobs' },
                 { label: 'Active Jobs', path: '/active-jobs' },
                 { label: 'Inactive Jobs', path: '/inactive-jobs' },
                 { label: 'Expired Jobs', path: '/expired-jobs' },
                 { label: 'Pending for Approval', path: '/pending-jobs' },
                 { label: 'Master Job', path: '/master-jobs' },
-                { label: 'Job Applications', path: '/job-applications' },
               ]
             },
             {
-              label: 'Social & Communication',
-              icon: Megaphone,
+              label: 'Tele Champ',
+              icon: Headphones,
               subItems: [
-                { label: 'Driver Video', path: '/driver-videos' },
-                { label: 'Quiz & Tests', path: '/quiz' },
-                { label: 'Blog Categories', path: '/blog-categories' },
-                { label: 'Blogs & Articles', path: '/blogs' },
-                { label: 'WhatsApp Groups', path: '/whatsapp-groups' },
+                { label: 'Dashboard', path: '/telechamp-dashboard' },
+                { label: 'Add Department', path: '/telechamp' },
               ]
             },
+            {
+              label: 'Video',
+              icon: Film,
+              subItems: [
+                { label: 'Module', path: '/video-modules' },
+                { label: 'Module Topic', path: '/module-topics' },
+                { label: 'Video', path: '/training-videos' },
+                { label: 'Health Hygiene', path: '/health-hygiene' },
+                { label: 'Driver Welfare', path: '/driver-welfare' },
+                { label: 'Welfare Topics', path: '/driver-welfare/topics' },
+              ]
+            },
+            {
+              label: 'Quiz',
+              icon: FileQuestion,
+              subItems: [
+                { label: 'Quiz & Tests', path: '/quiz' },
+              ]
+            },
+            {
+              label: 'Blogs',
+              icon: BookOpen,
+              subItems: [
+                { label: 'Blog Categories', path: '/blog-categories' },
+                { label: 'Blogs List', path: '/blogs' },
+              ]
+            },
+            { label: 'Add Dhaba', path: '/add-dhaba', icon: Utensils, prefix: true },
             {
               label: 'Team Members',
               icon: Users,
               subItems: [
                 { label: 'Members List', path: '/team-members' },
                 { label: 'Departments List', path: '/departments' }
+              ]
+            },
+            {
+              label: 'WhatsApp Group',
+              icon: Megaphone,
+              subItems: [
+                { label: 'WhatsApp Groups', path: '/whatsapp-groups' },
               ]
             },
           ]

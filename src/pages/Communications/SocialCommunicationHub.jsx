@@ -106,72 +106,7 @@ export default function SocialCommunicationHub() {
   // ==========================================
 
   // Tab 1: WhatsApp Groups (8 records)
-  const [whatsappGroups, setWhatsappGroups] = useState([
-    {
-      id: 1,
-      name: 'TruckMitr Official Group-VI',
-      type: 'Driver',
-      link: 'https://chat.whatsapp.com/D0IFX2DqGsNGnSrZdEwead?s=cl&p=a&mlu=4&ilr=4',
-      max_count: 1000,
-      status: 'Active'
-    },
-    {
-      id: 2,
-      name: 'TruckMitr Official Group-V',
-      type: 'Driver',
-      link: 'https://chat.whatsapp.com/EY9M3ScrOdJBgC5myroCVV',
-      max_count: 1024,
-      status: 'Inactive'
-    },
-    {
-      id: 3,
-      name: 'TruckMitr Official Group-IV',
-      type: 'Driver',
-      link: 'https://chat.whatsapp.com/Ec2zsdhCueO1HcoIbUhKM4?s=cl&p=i&ilr=1',
-      max_count: 1024,
-      status: 'Inactive'
-    },
-    {
-      id: 4,
-      name: 'Transporter Group - II',
-      type: 'Transporter',
-      link: 'https://chat.whatsapp.com/lypFtnydOxIHXu21Uxxy9l?mode=wwt',
-      max_count: 1026,
-      status: 'Inactive'
-    },
-    {
-      id: 5,
-      name: 'TruckMitr Official Group-III',
-      type: 'Driver',
-      link: 'https://chat.whatsapp.com/INUD9n5hoFG1OvwUC17OPu',
-      max_count: 1026,
-      status: 'Inactive'
-    },
-    {
-      id: 6,
-      name: 'TruckMitr Official Group-II',
-      type: 'Driver',
-      link: 'https://chat.whatsapp.com/LL6ZuGkYoW1ldpADhuQwoV',
-      max_count: 1026,
-      status: 'Inactive'
-    },
-    {
-      id: 7,
-      name: 'Transporter Group',
-      type: 'Transporter',
-      link: 'https://chat.whatsapp.com/DzGYiv4slkgAQEsYQ2aerv',
-      max_count: 256,
-      status: 'Active'
-    },
-    {
-      id: 8,
-      name: 'Driver Group',
-      type: 'Driver',
-      link: 'https://chat.whatsapp.com/KK9Cixv8cvLee7qbslDqNB',
-      max_count: 256,
-      status: 'Inactive'
-    }
-  ]);
+  const [whatsappGroups, setWhatsappGroups] = useState([]);
 
   const [whatsappSearch, setWhatsappSearch] = useState('');
   const [whatsappPageSize, setWhatsappPageSize] = useState(10);
@@ -184,50 +119,7 @@ export default function SocialCommunicationHub() {
   });
 
   // Tab 2 & 3: Blogs (6 records)
-  const [blogsList, setBlogsList] = useState([
-    {
-      id: 1,
-      title: 'How Outsourced Driver Management Improves Fleet Productivity',
-      status: 'Live',
-      publish_time: '18 Aug 2026, 01:00 PM',
-      category: 'Truck'
-    },
-    {
-      id: 2,
-      title: 'Why Driver Lifecycle Management is the Future of Fleet Operations in India The Driver Shortage Problem Is Only Part of the Story',
-      status: 'Live',
-      publish_time: '08 Aug 2026, 12:57 PM',
-      category: 'Truck'
-    },
-    {
-      id: 3,
-      title: "The Future of Driver-as-a-Service (DaaS) in India's Logistics Industry",
-      status: 'Live',
-      publish_time: '28 Jul 2026, 12:47 PM',
-      category: 'General'
-    },
-    {
-      id: 4,
-      title: 'Why Corporate Fleets Need Managed Driver Staffing Solutions',
-      status: 'Live',
-      publish_time: '18 Jul 2026, 03:28 PM',
-      category: 'Truck'
-    },
-    {
-      id: 5,
-      title: 'How Driver Lifecycle Management Reduces Operational Burden for Fleet Companies',
-      status: 'Live',
-      publish_time: '08 Jul 2026, 03:26 PM',
-      category: 'Truck'
-    },
-    {
-      id: 6,
-      title: 'How to Build Trust Between Transporters and Truck Drivers',
-      status: 'Live',
-      publish_time: '28 Jun 2026, 03:25 PM',
-      category: 'General'
-    }
-  ]);
+  const [blogsList, setBlogsList] = useState([]);
 
   const [blogsSearch, setBlogsSearch] = useState('');
   const [blogForm, setBlogForm] = useState({
@@ -239,52 +131,11 @@ export default function SocialCommunicationHub() {
   });
 
   // Tab 4: Blog Categories (3 records)
-  const [categories, setCategories] = useState([
-    { id: 1, name: 'Truck' },
-    { id: 2, name: 'Taxi' },
-    { id: 3, name: 'General' }
-  ]);
+  const [categories, setCategories] = useState([]);
   const [newCategoryName, setNewCategoryName] = useState('');
 
   // Tab 5 & 6: Banners (4 records)
-  const [bannersList, setBannersList] = useState([
-    {
-      id: 1,
-      title: 'Testimonial',
-      type: 'Video',
-      user_type: 'Driver',
-      status: 'Active',
-      created_at: '21 Aug 2026, 07:13 PM',
-      updated_at: '21 Aug 2026, 07:13 PM'
-    },
-    {
-      id: 2,
-      title: 'Driver Transporter Bridge',
-      type: 'Image',
-      user_type: 'Transporter',
-      status: 'Active',
-      created_at: '13 Aug 2026, 05:41 PM',
-      updated_at: '25 Sep 2026, 06:06 PM'
-    },
-    {
-      id: 3,
-      title: 'Driver Transporter Bridge',
-      type: 'Image',
-      user_type: 'Driver',
-      status: 'Active',
-      created_at: '13 Aug 2026, 05:39 PM',
-      updated_at: '22 Sep 2026, 12:42 PM'
-    },
-    {
-      id: 4,
-      title: 'Business Ads',
-      type: 'Image',
-      user_type: 'Transporter',
-      status: 'Active',
-      created_at: '28 May 2026, 05:38 PM',
-      updated_at: '28 May 2026, 05:38 PM'
-    }
-  ]);
+  const [bannersList, setBannersList] = useState([]);
   const [bannersSearch, setBannersSearch] = useState('');
   const [bannerForm, setBannerForm] = useState({
     title: '',
@@ -312,144 +163,11 @@ export default function SocialCommunicationHub() {
   // ==========================================
   const [videoSubTab, setVideoSubTab] = useState('video'); // 'video' | 'module' | 'moduletopic' | 'healthhygiene' | 'driverwelfare'
 
-  const [driverVideos, setDriverVideos] = useState([
-    {
-      id: 1,
-      title: 'ट्रक ब्रेकडाउन में ड्राइवर की जिम्मेदारी और सुरक्षा',
-      module_name: 'Module 3',
-      module_id: 3,
-      topic_name: 'Vehicle Checkup',
-      topic_id: 8,
-      upload_date: '28-Oct-2025 08:09',
-      thumbnail: 'https://images.unsplash.com/photo-1519003722824-194d4455a60c?w=160&auto=format&fit=crop&q=60',
-      video_url: 'https://www.w3schools.com/html/mov_bbb.mp4'
-    },
-    {
-      id: 2,
-      title: 'ट्रक ड्राइवरों के लिए बीमा और सुरक्षा जागरूकता!',
-      module_name: 'Module 3',
-      module_id: 3,
-      topic_name: 'Family Care',
-      topic_id: 7,
-      upload_date: '28-Oct-2025 08:08',
-      thumbnail: 'https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?w=160&auto=format&fit=crop&q=60',
-      video_url: 'https://www.w3schools.com/html/mov_bbb.mp4'
-    },
-    {
-      id: 3,
-      title: 'इलेक्ट्रिक ट्रक ड्राइवर ट्रेनिंग: नया सफर, नई जिम्मेदारी!',
-      module_name: 'Module 3',
-      module_id: 3,
-      topic_name: 'Upcoming Technologies',
-      topic_id: 6,
-      upload_date: '28-Oct-2025 07:36',
-      thumbnail: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=160&auto=format&fit=crop&q=60',
-      video_url: 'https://www.w3schools.com/html/mov_bbb.mp4'
-    },
-    {
-      id: 4,
-      title: 'ड्राइवर से ट्रक मालिक बनने का पूरा सफर!',
-      module_name: 'Module 3',
-      module_id: 3,
-      topic_name: 'Success Stories',
-      topic_id: 5,
-      upload_date: '28-Oct-2025 07:26',
-      thumbnail: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=160&auto=format&fit=crop&q=60',
-      video_url: 'https://www.w3schools.com/html/mov_bbb.mp4'
-    },
-    {
-      id: 5,
-      title: 'सेविंग्स और इन्वेस्टमेंट क्यों हैं ज़रूरी आपके लिए',
-      module_name: 'Module 3',
-      module_id: 3,
-      topic_name: 'Financial Education',
-      topic_id: 4,
-      upload_date: '02-Sep-2025 17:16',
-      thumbnail: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=160&auto=format&fit=crop&q=60',
-      video_url: 'https://www.w3schools.com/html/mov_bbb.mp4'
-    },
-    {
-      id: 6,
-      title: 'इंजन कूलेंट ग्रेड और प्रकार की पूरी जानकारी',
-      module_name: 'Module 3',
-      module_id: 3,
-      topic_name: 'Vehicles Fluids',
-      topic_id: 3,
-      upload_date: '02-Sep-2025 17:09',
-      thumbnail: 'https://images.unsplash.com/photo-1486006920555-c77dce18193b?w=160&auto=format&fit=crop&q=60',
-      video_url: 'https://www.w3schools.com/html/mov_bbb.mp4'
-    },
-    {
-      id: 7,
-      title: 'BS6 ट्रकों में आफ्टर ट्रीटमेंट सिस्टम (ATS) की पूरी व्याख्या',
-      module_name: 'Module 3',
-      module_id: 3,
-      topic_name: 'Technology',
-      topic_id: 2,
-      upload_date: '02-Sep-2025 13:34',
-      thumbnail: 'https://images.unsplash.com/photo-1617814076367-b759c7d7e738?w=160&auto=format&fit=crop&q=60',
-      video_url: 'https://www.w3schools.com/html/mov_bbb.mp4'
-    },
-    {
-      id: 8,
-      title: 'चेतावनी और सूचना ट्रैफिक संकेतों की जानकारी!',
-      module_name: 'Module 3',
-      module_id: 3,
-      topic_name: 'Safety',
-      topic_id: 1,
-      upload_date: '02-Sep-2025 01:27',
-      thumbnail: 'https://images.unsplash.com/photo-1508873696983-2df5293cb395?w=160&auto=format&fit=crop&q=60',
-      video_url: 'https://www.w3schools.com/html/mov_bbb.mp4'
-    },
-    {
-      id: 9,
-      title: 'लोडिंग के सर्वोत्तम अभ्यास || वाहन जांच',
-      module_name: 'Module 2',
-      module_id: 2,
-      topic_name: 'Vehicle Checkup',
-      topic_id: 8,
-      upload_date: '24-Jan-2025 05:02',
-      thumbnail: 'https://images.unsplash.com/photo-1519003722824-194d4455a60c?w=160&auto=format&fit=crop&q=60',
-      video_url: 'https://www.w3schools.com/html/mov_bbb.mp4'
-    },
-    {
-      id: 10,
-      title: 'बीमा के प्रकार (जीवन, चिकित्सा, टर्म, घर आदि)',
-      module_name: 'Module 2',
-      module_id: 2,
-      topic_name: 'Family Care',
-      topic_id: 7,
-      upload_date: '24-Jan-2025 05:00',
-      thumbnail: 'https://images.unsplash.com/photo-1450133064473-71024230f91b?w=160&auto=format&fit=crop&q=60',
-      video_url: 'https://www.w3schools.com/html/mov_bbb.mp4'
-    }
-  ]);
+  const [driverVideos, setDriverVideos] = useState([]);
 
-  const [videoModules, setVideoModules] = useState([
-    { id: 1, name: 'Module 1' },
-    { id: 2, name: 'Module 2' },
-    { id: 3, name: 'Module 3' },
-    { id: 4, name: 'Module 4' },
-    { id: 5, name: 'Module 5' },
-    { id: 6, name: 'Module 6' },
-    { id: 7, name: 'Module 7' },
-    { id: 8, name: 'Module 8' },
-    { id: 9, name: 'Module 9' },
-    { id: 10, name: 'Module 10' }
-  ]);
+  const [videoModules, setVideoModules] = useState([]);
 
-  const [videoTopics, setVideoTopics] = useState([
-    { id: 1, module_name: 'Module 1', mu_id: 1, topic_name: 'Safety' },
-    { id: 2, module_name: 'Module 1', mu_id: 1, topic_name: 'Technology' },
-    { id: 3, module_name: 'Module 1', mu_id: 1, topic_name: 'Vehicles Fluids' },
-    { id: 4, module_name: 'Module 1', mu_id: 1, topic_name: 'Financial Education' },
-    { id: 5, module_name: 'Module 1', mu_id: 1, topic_name: 'Success Stories' },
-    { id: 6, module_name: 'Module 1', mu_id: 1, topic_name: 'Upcoming Technologies' },
-    { id: 7, module_name: 'Module 1', mu_id: 1, topic_name: 'Family Care' },
-    { id: 8, module_name: 'Module 1', mu_id: 1, topic_name: 'Vehicle Checkup' },
-    { id: 9, module_name: 'Module 2', mu_id: 2, topic_name: 'Safety' },
-    { id: 10, module_name: 'Module 2', mu_id: 2, topic_name: 'Technology' }
-  ]);
+  const [videoTopics, setVideoTopics] = useState([]);
 
   const [healthHygieneVideos, setHealthHygieneVideos] = useState([]);
   const [welfareVideos, setWelfareVideos] = useState([]);
@@ -1079,7 +797,7 @@ export default function SocialCommunicationHub() {
             <MessageSquare className="w-3.5 h-3.5 pointer-events-none" />
             <span className="pointer-events-none">WhatsApp Groups</span>
             <span className={`pointer-events-none px-1.5 py-0.2 rounded-full text-[10px] font-bold ${activeTab === 'whatsapp' ? 'bg-blue-700 text-white' : 'bg-slate-100 text-slate-700'}`}>
-              {whatsappGroups.length || 8}
+              {whatsappGroups.length}
             </span>
           </button>
 
@@ -1095,7 +813,7 @@ export default function SocialCommunicationHub() {
             <FileText className="w-3.5 h-3.5 pointer-events-none" />
             <span className="pointer-events-none">Blogs & Articles</span>
             <span className={`pointer-events-none px-1.5 py-0.2 rounded-full text-[10px] font-bold ${activeTab === 'blogs-list' || activeTab === 'add-blog' ? 'bg-blue-700 text-white' : 'bg-slate-100 text-slate-700'}`}>
-              {blogsList.length || 65}
+              {blogsList.length}
             </span>
           </button>
 
@@ -1111,7 +829,7 @@ export default function SocialCommunicationHub() {
             <Tags className="w-3.5 h-3.5 pointer-events-none" />
             <span className="pointer-events-none">Blog Categories</span>
             <span className={`pointer-events-none px-1.5 py-0.2 rounded-full text-[10px] font-bold ${activeTab === 'blog-categories' ? 'bg-blue-700 text-white' : 'bg-slate-100 text-slate-700'}`}>
-              {categories.length || 3}
+              {categories.length}
             </span>
           </button>
 
@@ -1127,7 +845,7 @@ export default function SocialCommunicationHub() {
             <Image className="w-3.5 h-3.5 pointer-events-none" />
             <span className="pointer-events-none">Banner Management</span>
             <span className={`pointer-events-none px-1.5 py-0.2 rounded-full text-[10px] font-bold ${activeTab === 'banners-list' || activeTab === 'create-banner' ? 'bg-blue-700 text-white' : 'bg-slate-100 text-slate-700'}`}>
-              {bannersList.length || 28}
+              {bannersList.length}
             </span>
           </button>
 
@@ -1159,7 +877,7 @@ export default function SocialCommunicationHub() {
             <Video className="w-3.5 h-3.5 pointer-events-none" />
             <span className="pointer-events-none">Driver Video</span>
             <span className={`pointer-events-none px-1.5 py-0.2 rounded-full text-[10px] font-bold ${activeTab === 'driver-videos' ? 'bg-blue-700 text-white' : 'bg-slate-100 text-slate-700'}`}>
-              {driverVideos.length || 24}
+              {driverVideos.length}
             </span>
           </button>
         </nav>

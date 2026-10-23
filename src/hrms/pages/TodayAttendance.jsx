@@ -1,3 +1,4 @@
+import PageJump from '../../components/PageJump';
 import { useState, useRef, useMemo } from 'react'
 import { useNavigate } from '@hrms/router'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -747,6 +748,7 @@ const TodayAttendance = () => {
             >
               <ChevronRight className="w-4 h-4" />
             </button>
+            <PageJump page={currentPage} totalPages={totalPages} onGo={setCurrentPage} />
           </div>
         </div>
       </div>

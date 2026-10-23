@@ -60,22 +60,13 @@ export default function DepartmentMaster() {
       setIsRefreshing(true);
       const res = await api.get('/admin/departments');
       if (res.data && res.data.status === 'success' && res.data.departments) {
-        const liveDepts = res.data.departments;
-        const hasHod = liveDepts.some((d) => d.name.toUpperCase() === 'HOD');
-        if (!hasHod) {
-          setDepartments([
-            { id: 101, name: 'HOD', created_at: '06 Oct 2026', members_count: 1 },
-            ...liveDepts
-          ]);
-        } else {
-          setDepartments(liveDepts);
-        }
+        setDepartments(res.data.departments);
       } else {
-        setDepartments(defaultDepartments);
+        setDepartments([]);
       }
     } catch (err) {
       console.warn('Departments API load warning, using fallback dataset:', err);
-      setDepartments(defaultDepartments);
+      setDepartments([]);
     } finally {
       setIsRefreshing(false);
       setLoading(false);

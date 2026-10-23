@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
+import ListPager from '../../components/ListPager';
 import {
   Briefcase,
   Search,
@@ -34,122 +35,19 @@ export default function PendingApprovalJobsList() {
     setTimeout(() => setCopiedId(null), 2000);
   };
 
-  const [pendingJobs, setPendingJobs] = useState([
-    {
-      id: 301,
-      job_id: 'TMJB01892',
-      tmid: 'TM2610ODTR409725',
-      assigned_to: 'Chandarbhan',
-      contact_name: 'Yasuja Minerals & Mining',
-      mobile: '9237391921',
-      title: 'Need Driver for 18 wheeler tipper at Odisha for flyash & coal transport',
-      compensation: 'Heavy Tipper Mining route • ₹30,000 + Daily Allowance',
-      vehicle_type: 'Tipper Trucks',
-      license: 'HMV',
-      location: 'Odisha',
-      experience: '5 – 10 Yrs',
-      openings: 50,
-      submitted_date: '08 Oct 2026, 04:29 PM',
-      kyc_status: 'Transporter KYC Verified',
-      status: 'Pending'
-    },
-    {
-      id: 302,
-      job_id: 'TMJB01891',
-      tmid: 'TM2609TGTR397601',
-      assigned_to: 'Angad',
-      contact_name: 'Nawaz Transport Co',
-      mobile: '9700540830',
-      title: 'Ashok Leyland 16 tyre open body vehicle heavy truck driver wanted',
-      compensation: 'Long haul inter-state transport • ₹28,000',
-      vehicle_type: 'Cargo Truck (Open)',
-      license: 'HMV',
-      location: 'Telangana',
-      experience: '5 – 10 Yrs',
-      openings: 10,
-      submitted_date: '08 Oct 2026, 03:19 PM',
-      kyc_status: 'Pending GST Verification',
-      status: 'Pending'
-    },
-    {
-      id: 303,
-      job_id: 'TMJB01888',
-      tmid: 'TM2604HRTR47863',
-      assigned_to: 'Chandarbhan',
-      contact_name: 'Gaurav Yadav',
-      mobile: '9555555243',
-      title: 'Need driver for local on container 22ft',
-      compensation: 'Hub to Hub local distribution • ₹24,000',
-      vehicle_type: 'Container Trucks',
-      license: 'HMV',
-      location: 'Haryana',
-      experience: '1 – 5 Yrs',
-      openings: 10,
-      submitted_date: '05 Oct 2026, 08:27 PM',
-      kyc_status: 'Transporter KYC Verified',
-      status: 'Pending'
-    },
-    {
-      id: 304,
-      job_id: 'TMJB01887',
-      tmid: 'TM2608GJTR93980',
-      assigned_to: 'Angad',
-      contact_name: 'Vijay',
-      mobile: '6378021096',
-      title: '🚙 बोलेरो पिकअप ड्राइवर की आवश्यकता है राजस्थान और गुजरात के हो',
-      compensation: 'Light Commercial Delivery Route • ₹20,000',
-      vehicle_type: 'Light Commercial (LCV)',
-      license: 'LMV',
-      location: 'Gujarat',
-      experience: '1 – 5 Yrs',
-      openings: 4,
-      submitted_date: '05 Oct 2026, 02:26 PM',
-      kyc_status: 'Pending Phone Verification',
-      status: 'Pending'
-    },
-    {
-      id: 305,
-      job_id: 'TMJB01885',
-      tmid: 'TM2610TNTR409033',
-      assigned_to: 'Chandarbhan',
-      contact_name: 'Kowsik Narendran',
-      mobile: '9444051825',
-      title: 'HEAVY DRIVER FOR TRAILER',
-      compensation: 'Semi-Trailer Heavy Haulage Logistics • ₹35,000',
-      vehicle_type: 'Trailer / Semi-Trailer',
-      license: 'HGMV',
-      location: 'Tamil Nadu',
-      experience: '10 – 15 Yrs',
-      openings: 1,
-      submitted_date: '04 Oct 2026, 11:22 PM',
-      kyc_status: 'Transporter KYC Verified',
-      status: 'Pending'
-    },
-    {
-      id: 306,
-      job_id: 'TMJB01884',
-      tmid: 'TM2610TNTR409033',
-      assigned_to: 'Chandarbhan',
-      contact_name: 'Kowsik Narendran',
-      mobile: '9444051825',
-      title: 'Heavy Driver For Trailer Bulker',
-      compensation: 'Cement & Industrial Bulker Delivery • ₹36,000',
-      vehicle_type: 'Trailer / Semi-Trailer',
-      license: 'HGMV',
-      location: 'Andhra Pradesh',
-      experience: '5 – 10 Yrs',
-      openings: 10,
-      submitted_date: '04 Oct 2026, 11:04 PM',
-      kyc_status: 'Transporter KYC Verified',
-      status: 'Pending'
-    }
-  ]);
+  const [pendingJobs, setPendingJobs] = useState([]);
+  const [pageSize, setPageSize] = useState(20);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [meta, setMeta] = useState({ total: 0, last_page: 1 });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchPending = async () => {
+      setLoading(true);
       try {
-        const res = await api.get('/admin/jobs-brief', { params: { status: 'pending', per_page: 50 } });
-        if (res.data && res.data.status === 'success' && Array.isArray(res.data.data) && res.data.data.length > 0) {
+        const res = await api.get('/admin/jobs-brief', { params: { status: 'pending', per_page: pageSize, page: currentPage } });
+        if (res.data && res.data.status === 'success' && Array.isArray(res.data.data)) {
+          setMeta({ total: res.data.total || 0, last_page: res.data.last_page || 1 });
           const mapped = res.data.data.map(j => ({
             id: j.id,
             job_id: j.job_id,
@@ -171,11 +69,13 @@ export default function PendingApprovalJobsList() {
           setPendingJobs(mapped);
         }
       } catch {
-        // Fallback already in initial state
+        setPendingJobs([]);
+      } finally {
+        setLoading(false);
       }
     };
     fetchPending();
-  }, []);
+  }, [currentPage, pageSize]);
 
   const handleApprove = async (job) => {
     try {
@@ -225,7 +125,7 @@ export default function PendingApprovalJobsList() {
             <h1 className="text-2xl font-bold tracking-tight text-slate-900">Pending Approvals Queue</h1>
             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
               <Clock className="w-3.5 h-3.5" />
-              6 Postings Under Review
+              {meta.total.toLocaleString('en-IN')} Postings Under Review
             </span>
           </div>
           <p className="text-sm text-slate-500 mt-1">
@@ -270,7 +170,7 @@ export default function PendingApprovalJobsList() {
             <tbody className="divide-y divide-slate-200">
               {filtered.map((job, idx) => (
                 <tr key={job.id} className="hover:bg-slate-50/80 transition">
-                  <td className="px-3.5 py-3 text-center text-slate-500 font-medium">{idx + 1}</td>
+                  <td className="px-3.5 py-3 text-center text-slate-500 font-medium">{(currentPage - 1) * pageSize + idx + 1}</td>
                   <td className="px-3.5 py-3 font-semibold text-amber-700 font-mono">{job.job_id}</td>
                   <td className="px-3.5 py-3 font-mono text-slate-600 text-[11px]">{job.tmid}</td>
                   <td className="px-3.5 py-3 font-medium text-slate-900">{job.contact_name}</td>
@@ -329,9 +229,22 @@ export default function PendingApprovalJobsList() {
                   </td>
                 </tr>
               ))}
+              {!filtered.length && (
+                <tr>
+                  <td colSpan={12} className="px-4 py-12 text-center text-sm text-slate-400">{loading ? 'Loading…' : 'No jobs pending approval'}</td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
+        <ListPager
+          page={currentPage}
+          lastPage={meta.last_page}
+          total={meta.total}
+          pageSize={pageSize}
+          onPage={setCurrentPage}
+          onPageSize={(n) => { setPageSize(n); setCurrentPage(1); }}
+        />
       </div>
     </div>
   );

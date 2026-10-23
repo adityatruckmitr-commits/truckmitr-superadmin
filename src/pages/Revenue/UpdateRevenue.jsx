@@ -27,6 +27,7 @@ import {
   Trash2
 } from 'lucide-react';
 import api from '../../services/api';
+import PageJump from '../../components/PageJump';
 
 export default function UpdateRevenue() {
   // Helper to format date YYYY-MM-DD
@@ -1769,6 +1770,7 @@ export default function UpdateRevenue() {
             >
               ›
             </button>
+            <PageJump page={currentPage} totalPages={pagination.last_page} onGo={setCurrentPage} />
           </div>
         </div>
       </section>

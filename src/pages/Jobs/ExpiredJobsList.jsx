@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
+import ListPager from '../../components/ListPager';
 import {
   Briefcase,
   Search,
@@ -22,7 +23,7 @@ import {
 export default function ExpiredJobsList() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(20);
   const [currentPage, setCurrentPage] = useState(1);
   const [toastMessage, setToastMessage] = useState('');
   const [copiedId, setCopiedId] = useState(null);
@@ -39,90 +40,17 @@ export default function ExpiredJobsList() {
     setTimeout(() => setCopiedId(null), 2000);
   };
 
-  const [expiredJobs, setExpiredJobs] = useState([
-    {
-      id: 101,
-      job_id: 'TMJB01742',
-      tmid: 'TM2508DLTR209384',
-      assigned_to: 'Aayushi Verma',
-      contact_name: 'Super Express Logistics',
-      mobile: '9811002233',
-      title: '🚚 10 चक्का ओपन बॉडी ट्रक ड्राइवर - दिल्ली से मुंबई',
-      compensation: '💰 ₹26,000 + ₹400 डेली भत्ता',
-      vehicle_type: 'Cargo Truck (Open)',
-      license: 'HMV',
-      location: 'Delhi',
-      experience: '5 – 10 Yrs',
-      openings: 3,
-      posted_date: '10 Aug 2026',
-      expired_date: 'Expired: 10 Sep 2026',
-      apps_received: 12,
-      status: 'Expired'
-    },
-    {
-      id: 102,
-      job_id: 'TMJB01738',
-      tmid: 'TM2508RJTR198472',
-      assigned_to: 'Chandarbhan',
-      contact_name: 'Marwar Roadways',
-      mobile: '9414012399',
-      title: '🚚 32 फीट सिंगल एक्सल कंटेनर ड्राइवर - जयपुर से अहमदाबाद',
-      compensation: '💰 ₹22,000 + माइलेज बोनस',
-      vehicle_type: 'Container Trucks',
-      license: 'HMV',
-      location: 'Rajasthan',
-      experience: '3 – 5 Yrs',
-      openings: 2,
-      posted_date: '05 Aug 2026',
-      expired_date: 'Expired: 05 Sep 2026',
-      apps_received: 8,
-      status: 'Expired'
-    },
-    {
-      id: 103,
-      job_id: 'TMJB01725',
-      tmid: 'TM2507HRTR188293',
-      assigned_to: 'Angad',
-      contact_name: 'Gurgaon Express Movers',
-      mobile: '9555123490',
-      title: '🚚 टाटा 407 (6 चक्का) लोकल ड्राइवर - मानेसर हब',
-      compensation: '💰 ₹18,000 फिक्स्ड',
-      vehicle_type: 'Light Commercial (LCV)',
-      license: 'LMV',
-      location: 'Haryana',
-      experience: '1 – 3 Yrs',
-      openings: 1,
-      posted_date: '20 Jul 2026',
-      expired_date: 'Expired: 20 Aug 2026',
-      apps_received: 15,
-      status: 'Expired'
-    },
-    {
-      id: 104,
-      job_id: 'TMJB01710',
-      tmid: 'TM2507PBTR177483',
-      assigned_to: 'Chandarbhan',
-      contact_name: 'Punjab Golden Goods',
-      mobile: '9216098765',
-      title: '🚚 14 चक्का ट्रेलर ड्राइवर - लुधियाना से कांडला पोर्ट',
-      compensation: '💰 ₹38,000 + ट्रिप इंसेंटिव',
-      vehicle_type: 'Trailer / Semi-Trailer',
-      license: 'HGMV',
-      location: 'Punjab',
-      experience: '7 – 12 Yrs',
-      openings: 4,
-      posted_date: '15 Jul 2026',
-      expired_date: 'Expired: 15 Aug 2026',
-      apps_received: 6,
-      status: 'Expired'
-    }
-  ]);
+  const [expiredJobs, setExpiredJobs] = useState([]);
+  const [meta, setMeta] = useState({ total: 0, last_page: 1 });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchExpired = async () => {
+      setLoading(true);
       try {
-        const res = await api.get('/admin/jobs-brief', { params: { status: 'expired', per_page: 50 } });
-        if (res.data && res.data.status === 'success' && Array.isArray(res.data.data) && res.data.data.length > 0) {
+        const res = await api.get('/admin/jobs-brief', { params: { status: 'expired', per_page: pageSize, page: currentPage } });
+        if (res.data && res.data.status === 'success' && Array.isArray(res.data.data)) {
+          setMeta({ total: res.data.total || 0, last_page: res.data.last_page || 1 });
           const mapped = res.data.data.map(j => ({
             id: j.id,
             job_id: j.job_id,
@@ -145,11 +73,13 @@ export default function ExpiredJobsList() {
           setExpiredJobs(mapped);
         }
       } catch {
-        // Fallback in initial state
+        setExpiredJobs([]);
+      } finally {
+        setLoading(false);
       }
     };
     fetchExpired();
-  }, []);
+  }, [currentPage, pageSize]);
 
   const handleRenewJob = async (job) => {
     try {
@@ -189,7 +119,7 @@ export default function ExpiredJobsList() {
             <h1 className="text-2xl font-bold tracking-tight text-slate-900">Expired Jobs Roster</h1>
             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200">
               <AlertTriangle className="w-3.5 h-3.5" />
-              18 Expired Postings
+              {meta.total.toLocaleString('en-IN')} Expired Postings
             </span>
           </div>
           <p className="text-sm text-slate-500 mt-1">
@@ -234,7 +164,7 @@ export default function ExpiredJobsList() {
             <tbody className="divide-y divide-slate-200">
               {filtered.map((job, idx) => (
                 <tr key={job.id} className="hover:bg-slate-50/80 transition">
-                  <td className="px-3.5 py-3 text-center text-slate-500 font-medium">{idx + 1}</td>
+                  <td className="px-3.5 py-3 text-center text-slate-500 font-medium">{(currentPage - 1) * pageSize + idx + 1}</td>
                   <td className="px-3.5 py-3 font-semibold text-rose-600 font-mono">{job.job_id}</td>
                   <td className="px-3.5 py-3 font-mono text-slate-600 text-[11px]">{job.tmid}</td>
                   <td className="px-3.5 py-3 font-medium text-slate-900">{job.contact_name}</td>
@@ -283,9 +213,22 @@ export default function ExpiredJobsList() {
                   </td>
                 </tr>
               ))}
+              {!filtered.length && (
+                <tr>
+                  <td colSpan={12} className="px-4 py-12 text-center text-sm text-slate-400">{loading ? 'Loading…' : 'No expired jobs found'}</td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
+        <ListPager
+          page={currentPage}
+          lastPage={meta.last_page}
+          total={meta.total}
+          pageSize={pageSize}
+          onPage={setCurrentPage}
+          onPageSize={(n) => { setPageSize(n); setCurrentPage(1); }}
+        />
       </div>
     </div>
   );

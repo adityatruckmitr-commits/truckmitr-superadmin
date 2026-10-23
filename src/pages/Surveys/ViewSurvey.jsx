@@ -25,6 +25,20 @@ import {
   AlertCircle
 } from 'lucide-react';
 
+// Shown when the survey can't be loaded (no placeholder data)
+const EMPTY_SURVEY = {
+  id: null, title: 'Survey not found', description: '', status: '—', start_date: '—', end_date: '—',
+  target_roles: [], created_by: '—', created_at: '—', last_updated: '—', created_ago: '—',
+  total_questions: 0, total_responses: 0, questions: []
+};
+
+const timeAgo = (value) => {
+  if (!value) return '—';
+  const days = Math.floor((Date.now() - new Date(value).getTime()) / 86400000);
+  if (Number.isNaN(days)) return '—';
+  return days <= 0 ? 'Today' : days === 1 ? '1 day ago' : `${days} days ago`;
+};
+
 export default function ViewSurvey() {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -159,23 +173,23 @@ export default function ViewSurvey() {
               const respondentsList = (typeof opt === 'object' && opt.respondents && opt.respondents.length > 0)
                 ? opt.respondents.map((u, uIdx) => ({
                     id: uIdx + 1,
-                    user_id: u.user_id || u.id || `1155${uIdx}`,
-                    unique_id: u.unique_id || `TM2610DR${410400 + uIdx}`,
-                    name: u.name || 'Respondent User',
-                    submitted_at: u.submitted_at ? new Date(u.submitted_at).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true }) : '08 Oct 2026, 05:00 PM'
+                    user_id: u.user_id || u.id || '—',
+                    unique_id: u.unique_id || '—',
+                    name: u.name || '—',
+                    submitted_at: u.submitted_at ? new Date(u.submitted_at).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true }) : '—'
                   }))
-                : (defaultSurveyViewData.questions[0].options[oIndex]?.respondents || []);
+                : [];
 
               return {
                 option_id: oIndex + 1,
                 label: optText,
                 icon: oIndex === 0 ? '👍' : oIndex === 1 ? '👎' : oIndex === 2 ? '🤔' : '👥',
-                response_count: respCount || (defaultSurveyViewData.questions[0].options[oIndex]?.response_count || 100),
+                response_count: respCount || 0,
                 respondents: respondentsList
               };
             });
           } else {
-            opts = defaultSurveyViewData.questions[0].options;
+            opts = [];
           }
 
           return {
@@ -190,23 +204,23 @@ export default function ViewSurvey() {
           title: s.title,
           description: s.description || '',
           status: (s.status || 'Active').charAt(0).toUpperCase() + (s.status || 'Active').slice(1),
-          start_date: s.start_date ? new Date(s.start_date).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true }) : '03 Oct 2026, 04:35 PM',
-          end_date: s.end_date ? new Date(s.end_date).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true }) : '31 Oct 2026, 04:35 PM',
+          start_date: s.start_date ? new Date(s.start_date).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true }) : '—',
+          end_date: s.end_date ? new Date(s.end_date).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true }) : '—',
           target_roles: roles.map(r => r.charAt(0).toUpperCase() + r.slice(1)),
           created_by: s.creator_name || 'Unknown',
-          created_at: s.created_at ? new Date(s.created_at).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true }) : '03 Oct 2026, 04:35 PM',
-          last_updated: '5 days ago',
-          created_ago: '5 days ago',
-          total_questions: formattedQuestions.length || 1,
-          total_responses: stats.total_responses || 2041,
-          questions: formattedQuestions.length > 0 ? formattedQuestions : defaultSurveyViewData.questions
+          created_at: s.created_at ? new Date(s.created_at).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true }) : '—',
+          last_updated: timeAgo(s.updated_at),
+          created_ago: timeAgo(s.created_at),
+          total_questions: formattedQuestions.length,
+          total_responses: stats.total_responses || 0,
+          questions: formattedQuestions
         });
       } else {
-        setSurvey(defaultSurveyViewData);
+        setSurvey(EMPTY_SURVEY);
       }
     } catch (err) {
-      console.warn('Using default survey preview data:', err);
-      setSurvey(defaultSurveyViewData);
+      console.warn('Survey API error:', err);
+      setSurvey(EMPTY_SURVEY);
     } finally {
       setLoading(false);
     }
@@ -242,7 +256,7 @@ export default function ViewSurvey() {
     );
   }
 
-  const primaryQuestion = survey.questions && survey.questions[0] ? survey.questions[0] : defaultSurveyViewData.questions[0];
+  const primaryQuestion = survey.questions && survey.questions[0] ? survey.questions[0] : { question_text: 'No questions', options: [] };
 
   return (
     <div className="space-y-6 pb-12 font-sans">

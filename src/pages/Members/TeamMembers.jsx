@@ -25,6 +25,7 @@ import {
   Layers,
   ArrowUpDown
 } from 'lucide-react';
+import PageJump from '../../components/PageJump';
 
 export default function TeamMembers() {
   const navigate = useNavigate();
@@ -44,7 +45,7 @@ export default function TeamMembers() {
   const [selectedStatus, setSelectedStatus] = useState('All Statuses');
   const [selectedState, setSelectedState] = useState('All States');
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(15);
+  const [pageSize, setPageSize] = useState(20);
 
   // Modals
   const [addMemberModalOpen, setAddMemberModalOpen] = useState(false);
@@ -155,21 +156,21 @@ export default function TeamMembers() {
         if (res.data.members && res.data.members.length > 0) {
           setMembers(res.data.members);
         } else {
-          setMembers(defaultMembersDataset);
+          setMembers([]);
         }
         if (res.data.departments && res.data.departments.length > 0) {
           setDepartments(res.data.departments);
         } else {
-          setDepartments(defaultDepartments);
+          setDepartments([]);
         }
       } else {
-        setMembers(defaultMembersDataset);
-        setDepartments(defaultDepartments);
+        setMembers([]);
+        setDepartments([]);
       }
     } catch (err) {
       console.warn('Live API load warning, falling back to comprehensive dataset:', err);
-      setMembers(defaultMembersDataset);
-      setDepartments(defaultDepartments);
+      setMembers([]);
+      setDepartments([]);
     } finally {
       setIsRefreshing(false);
       setLoading(false);
@@ -715,6 +716,7 @@ export default function TeamMembers() {
               >
                 ›
               </button>
+              <PageJump page={currentPage} totalPages={totalPages} onGo={setCurrentPage} />
             </div>
           </div>
         </div>

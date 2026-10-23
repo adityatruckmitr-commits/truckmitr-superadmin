@@ -30,37 +30,8 @@ export default function EditMember() {
   const [toast, setToast] = useState({ message: '', type: 'success' });
 
   // Dropdown Options
-  const [departmentList, setDepartmentList] = useState([
-    'Management',
-    'Telecalling',
-    'Sales',
-    'Marketing',
-    'HR',
-    'IT',
-    'HOD'
-  ]);
-  const [stateList, setStateList] = useState([
-    'Delhi',
-    'Uttar Pradesh',
-    'Maharashtra',
-    'Uttarakhand',
-    'Haryana',
-    'Rajasthan',
-    'Bihar',
-    'Gujarat',
-    'Karnataka',
-    'Madhya Pradesh',
-    'Punjab',
-    'West Bengal',
-    'Tamil Nadu',
-    'Telangana',
-    'Kerala',
-    'Andhra Pradesh',
-    'Assam',
-    'Jharkhand',
-    'Odisha',
-    'Chhattisgarh'
-  ]);
+  const [departmentList, setDepartmentList] = useState([]);
+  const [stateList, setStateList] = useState([]);
   const [managerList, setManagerList] = useState([]);
 
   // Form State matching all 7 sections

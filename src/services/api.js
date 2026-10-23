@@ -35,10 +35,10 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem('tm_admin_token');
-      localStorage.removeItem('tm_admin_user');
-      if (window.location.pathname !== '/superadmin/login' && window.location.pathname !== '/login') {
-        window.location.href = '/superadmin/login';
+      // The login token has expired (3-hour session) or was revoked: end the whole console session
+      ['tm_admin_token', 'tm_admin_user', 'tm_hrms_user', 'token', 'prod_token', 'refresh_token', 'user'].forEach((key) => localStorage.removeItem(key));
+      if (window.location.pathname !== '/login') {
+        window.location.href = '/login?expired=1';
       }
     }
     return Promise.reject(error);

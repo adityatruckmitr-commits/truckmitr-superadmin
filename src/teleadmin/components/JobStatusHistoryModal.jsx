@@ -1,3 +1,4 @@
+import PageJump from '../../components/PageJump';
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { X, Search, History, Calendar, Briefcase, User, ArrowRight } from 'lucide-react-teleadmin';
@@ -361,6 +362,7 @@ const JobStatusHistoryModal = ({ isOpen, onClose }) => {
                                     >
                                         Next
                                     </button>
+                                    <PageJump page={currentPage} totalPages={pagination.last_page} onGo={setCurrentPage} />
                                     <button
                                         onClick={() => setCurrentPage(pagination.last_page)}
                                         disabled={pagination.current_page === pagination.last_page}

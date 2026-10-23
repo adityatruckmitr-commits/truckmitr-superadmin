@@ -1,3 +1,4 @@
+import PageJump from '../../../../components/PageJump';
 import { useState, useMemo, useEffect } from 'react';
 import { MapPin, Users, ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react-teleadmin';
 import { IMAGE_BASE_URL } from '../../../config/api.config';
@@ -512,6 +513,7 @@ const LeadsTable = ({ leads, isLoading, roleFilter, currentPage, totalCount, per
                 Next
                 <ChevronRight className="w-4 h-4" />
               </button>
+              <PageJump page={currentPage} totalPages={totalPages} onGo={handlePageChange} />
             </div>
           </div>
         </div>

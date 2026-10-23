@@ -58,7 +58,7 @@ export default function DriverList() {
                 <tr key={i} className="hover:bg-slate-50">
                   <td className="p-3 font-bold text-indigo-600">TM-{d.id || i+100}</td>
                   <td className="p-3 font-bold text-slate-900">{d.name || 'Verified Driver'}</td>
-                  <td className="p-3 text-slate-600">{d.mobile || '9876543210'}</td>
+                  <td className="p-3 text-slate-600">{d.mobile || '—'}</td>
                   <td className="p-3 text-slate-600">{d.state || 'Maharashtra'}</td>
                   <td className="p-3"><span className="px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded-full font-bold">Active</span></td>
                   <td className="p-3 text-slate-500">{d.created_at || 'Today'}</td>

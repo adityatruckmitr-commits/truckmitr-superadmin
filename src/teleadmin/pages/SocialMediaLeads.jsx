@@ -1,3 +1,4 @@
+import PageJump from '../../components/PageJump';
 import { useState } from 'react';
 import { Link } from '@teleadmin/router';
 import { useQuery } from '@tanstack/react-query';
@@ -575,6 +576,7 @@ const SocialMediaLeads = () => {
                 );
               })()}
               <button disabled={searchParams.page === totalPages} onClick={() => handlePageChange(searchParams.page + 1)} className="p-2 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors disabled:opacity-30"><ChevronRight className="w-4 h-4" /></button>
+              <PageJump page={searchParams.page} totalPages={totalPages} onGo={handlePageChange} />
             </div>
           </div>
         )}

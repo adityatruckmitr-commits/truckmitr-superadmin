@@ -32,7 +32,6 @@ export default function CallbackRequests() {
     list: {
       path: '/admin/callback-requests',
       key: 'callbackRequests',
-      filters: [{ name: 'per_page', placeholder: '20 per page', options: [10, 20, 50, 100].map((n) => ({ value: n, label: `${n} per page` })) }],
       search: (row, q) => `${row.unique_id} ${row.user_name} ${row.mobile_number} ${row.telecaller?.name}`.toLowerCase().includes(q),
       searchPlaceholder: 'Search this page...',
       minWidth: 1100,

@@ -277,7 +277,7 @@ export default function NotificationTracking({ defaultTab = 'overview' }) {
           setNotificationsList(res.data.notifications.data || []);
           setPagination({
             current_page: res.data.notifications.current_page || 1,
-            total: res.data.notifications.total || 45,
+            total: res.data.notifications.total || 0,
             per_page: res.data.notifications.per_page || 8,
             last_page: res.data.notifications.last_page || 6,
             from: res.data.notifications.from || 1,

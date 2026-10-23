@@ -23,7 +23,7 @@ export const endConsoleSession = () => {
   ;['token', 'prod_token', 'refresh_token', 'user', 'tm_admin_token', 'tm_admin_user', HRMS_USER_KEY].forEach((key) =>
     localStorage.removeItem(key)
   )
-  window.location.href = '/login'
+  window.location.href = '/login?expired=1'
 }
 
 // Portals (drawers, palettes, modals) render here so they keep the HRMS palette

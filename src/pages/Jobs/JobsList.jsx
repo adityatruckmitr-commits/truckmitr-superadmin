@@ -31,6 +31,7 @@ import {
   Building2,
   Users
 } from 'lucide-react';
+import PageJump from '../../components/PageJump';
 
 export default function JobsList() {
   const navigate = useNavigate();
@@ -43,13 +44,7 @@ export default function JobsList() {
   const [stats, setStats] = useState({ total: 1510, active: 62, pending: 214, inactive: 110, expired: 1411 });
   const [totalCount, setTotalCount] = useState(1510);
   const [totalPages, setTotalPages] = useState(76);
-  const [telecallersList, setTelecallersList] = useState([
-    { id: 39, name: 'Angad' },
-    { id: 49, name: 'Aayushi Verma' },
-    { id: 38, name: 'Chandarbhan' },
-    { id: 9, name: 'Raksha' },
-    { id: 10, name: 'Ankit Singh' }
-  ]);
+  const [telecallersList, setTelecallersList] = useState([]);
 
   // Filters & Controls
   const [activeTab, setActiveTab] = useState('all'); // 'all' | 'active' | 'pending' | 'closed'
@@ -432,11 +427,11 @@ export default function JobsList() {
         if (res.data.last_page !== undefined) setTotalPages(res.data.last_page);
         if (res.data.stats) setStats(res.data.stats);
       } else {
-        setJobs(defaultJobsDataset);
+        setJobs([]);
       }
     } catch (err) {
-      console.warn('API fetch warning, using default jobs dataset:', err);
-      setJobs(defaultJobsDataset);
+      console.warn('Jobs API error:', err);
+      setJobs([]);
     } finally {
       setLoading(false);
       setIsRefreshing(false);
@@ -1184,6 +1179,7 @@ export default function JobsList() {
             >
               Next
             </button>
+            <PageJump page={currentPage} totalPages={totalPages} onGo={setCurrentPage} />
           </div>
         </div>
       </div>

@@ -72,7 +72,7 @@ export default function DriverHireFormLeads() {
           jobsPosted: 1,
           driversNeeded: 1,
           vehicle: l.vehicle || 'Trailer Trucks',
-          salary: l.salary || '40000-50000',
+          salary: l.salary || '—',
           location: l.job_location || 'India',
           notes: `${l.driver_name || 'Driver'} applied for ${l.job_title || 'Driver Job'}`,
           assignedTo: l.assigned_to || 'Angad'

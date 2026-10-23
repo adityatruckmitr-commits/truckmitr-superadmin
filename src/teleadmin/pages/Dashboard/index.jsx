@@ -891,7 +891,7 @@ const Dashboard = () => {
                 { label: "Total Inactive Jobs", value: todayStatsResponse?.data.inactive_jobs || 0, icon: <AlertCircle className="w-3 h-3 text-slate-500" /> },
                 { label: "Total Expired Jobs", value: todayStatsResponse?.data.expired_jobs || 0, icon: <XCircle className="w-3 h-3 text-rose-500" /> },
                 { label: "Total Closed Jobs", value: todayStatsResponse?.data.closed_jobs || 0, icon: <CheckCircle2 className="w-3 h-3 text-emerald-500" /> },
-                { label: "Closed Breakdown", value: `Exp: ${todayStatsResponse?.data.closed_expired_jobs || 0} | Pend: ${todayStatsResponse?.data.closed_pending_jobs || 0} | Inact: ${todayStatsResponse?.data.closed_inactive_jobs || 0}`, icon: <TrendingDown className="w-3 h-3 text-slate-400" />, valueColor: "text-[10px] text-slate-500 font-semibold" }
+                { label: "Closed Breakdown", value: `Exp: ${todayStatsResponse?.data.closed_expired_jobs || 0} | Pend: ${todayStatsResponse?.data.closed_pending_jobs || 0} | Inact: ${todayStatsResponse?.data.closed_inactive_jobs || 0} | Act: ${todayStatsResponse?.data.closed_active_jobs || 0}`, icon: <TrendingDown className="w-3 h-3 text-slate-400" />, valueColor: "text-[10px] text-slate-500 font-semibold" }
               ]
             },
             {

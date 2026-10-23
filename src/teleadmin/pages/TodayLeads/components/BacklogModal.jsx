@@ -1,3 +1,4 @@
+import PageJump from '../../../../components/PageJump';
 import { useState } from 'react';
 import { X, User, Phone, MapPin, ChevronLeft, ChevronRight } from 'lucide-react-teleadmin';
 import { IMAGE_BASE_URL } from '../../../config/api.config';
@@ -291,6 +292,7 @@ const BacklogModal = ({ data, onClose }) => {
                     Next
                     <ChevronRight className="w-4 h-4" />
                   </button>
+                  <PageJump page={currentPageNum} totalPages={lastPage} onGo={setCurrentPage} />
                 </div>
               </div>
             </div>

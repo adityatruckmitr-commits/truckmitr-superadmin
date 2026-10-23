@@ -15,6 +15,7 @@ import {
   ShieldCheck,
   Check
 } from 'lucide-react';
+import PageJump from '../../components/PageJump';
 
 export default function BrandList() {
   const [brands, setBrands] = useState([]);
@@ -26,7 +27,7 @@ export default function BrandList() {
   const [filePreview, setFilePreview] = useState(null);
 
   const [searchQuery, setSearchQuery] = useState('');
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(20);
   const [currentPage, setCurrentPage] = useState(1);
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
 
@@ -36,12 +37,16 @@ export default function BrandList() {
   };
 
   // Fetch Brands List
+  // models in trucklist (sent with the brands list)
+  const [truckModels, setTruckModels] = useState(null);
+
   const fetchBrands = async () => {
     setLoading(true);
     try {
       const res = await api.get('/admin/brand');
       if (res.data?.status === 'success' && Array.isArray(res.data.data)) {
         setBrands(res.data.data);
+        setTruckModels(res.data.truck_models ?? null);
       } else {
         setBrands([]);
       }
@@ -255,7 +260,7 @@ export default function BrandList() {
               <Building2 className="w-4 h-4" />
             </span>
           </div>
-          <p className="text-2xl font-black text-slate-900 mt-2">{brands.length || 9}</p>
+          <p className="text-2xl font-black text-slate-900 mt-2">{brands.length}</p>
           <p className="text-[11px] text-slate-500 mt-1 flex items-center gap-1 font-bold text-emerald-600">
             <Check className="w-3.5 h-3.5" />
             Active OEM Partners
@@ -271,7 +276,7 @@ export default function BrandList() {
             </span>
           </div>
           <p className="text-2xl font-black text-slate-900 mt-2">
-            {brands.filter((b) => Boolean(b.brand_images)).length || brands.length}
+            {brands.filter((b) => Boolean(b.brand_images)).length}
           </p>
           <p className="text-[11px] text-slate-500 mt-1 font-medium">150 x 94px Dimensions</p>
         </div>
@@ -284,7 +289,7 @@ export default function BrandList() {
               <Truck className="w-4 h-4" />
             </span>
           </div>
-          <p className="text-2xl font-black text-slate-900 mt-2">142</p>
+          <p className="text-2xl font-black text-slate-900 mt-2">{truckModels ?? '—'}</p>
           <p className="text-[11px] text-slate-500 mt-1 font-medium">Active in Marketplace</p>
         </div>
 
@@ -296,8 +301,8 @@ export default function BrandList() {
               <ShieldCheck className="w-4 h-4" />
             </span>
           </div>
-          <p className="text-2xl font-black text-slate-900 mt-2">38</p>
-          <p className="text-[11px] text-slate-500 mt-1 font-medium">Pan-India Network</p>
+          <p className="text-2xl font-black text-slate-900 mt-2">—</p>
+          <p className="text-[11px] text-slate-500 mt-1 font-medium">No dealer data recorded yet</p>
         </div>
       </section>
 
@@ -418,6 +423,7 @@ export default function BrandList() {
                 className="text-xs py-1.5 pl-2.5 pr-7 bg-slate-50 border border-slate-200 rounded-lg font-semibold text-slate-700 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
               >
                 <option value={10}>10</option>
+                <option value={20}>20</option>
                 <option value={25}>25</option>
                 <option value={50}>50</option>
               </select>
@@ -568,6 +574,7 @@ export default function BrandList() {
             >
               Next
             </button>
+            <PageJump page={currentPage} totalPages={totalPages} onGo={setCurrentPage} />
           </div>
         </div>
       </section>

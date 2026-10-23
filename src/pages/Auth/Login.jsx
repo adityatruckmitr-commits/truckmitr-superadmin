@@ -7,6 +7,8 @@ export default function Login() {
   const [mobile, setMobile] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  // ?expired=1: sent here because the 3-hour session ended
+  const sessionExpired = new URLSearchParams(window.location.search).has('expired');
   const { login, loading } = useAuth();
   const navigate = useNavigate();
 
@@ -39,6 +41,13 @@ export default function Login() {
           <div className="mb-6 p-3 bg-red-50 border border-red-200 rounded-2xl flex items-center gap-2 text-sm text-red-600">
             <AlertCircle className="w-4 h-4 shrink-0" />
             <span>{error}</span>
+          </div>
+        )}
+
+        {!error && sessionExpired && (
+          <div className="mb-6 p-3 bg-amber-50 border border-amber-200 rounded-2xl flex items-center gap-2 text-sm text-amber-700">
+            <AlertCircle className="w-4 h-4 shrink-0" />
+            <span>Your session has ended (sessions last 3 hours). Please sign in again.</span>
           </div>
         )}
 

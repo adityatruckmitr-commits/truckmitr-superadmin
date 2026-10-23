@@ -1,3 +1,4 @@
+import PageJump from '../../components/PageJump';
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from '@teleadmin/router';
 import { useAuth } from '../context/AuthContext';
@@ -1064,6 +1065,7 @@ const Revenue = () => {
                   >
                     Next
                   </button>
+                  <PageJump page={data.records?.current_page} totalPages={data.records?.last_page} onGo={handlePageChange} />
                </div>
             </div>
           </div>

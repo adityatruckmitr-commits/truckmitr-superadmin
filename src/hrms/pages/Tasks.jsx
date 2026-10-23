@@ -1,3 +1,4 @@
+import PageJump from '../../components/PageJump';
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
@@ -553,6 +554,7 @@ const Tasks = () => {
               >
                 Next
               </button>
+              <PageJump page={currentPage} totalPages={totalPages} onGo={handlePageChange} />
             </div>
             <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
               <div>
@@ -596,6 +598,7 @@ const Tasks = () => {
                     <span className="sr-only">Next</span>
                     <ChevronRight className="h-5 w-5" aria-hidden="true" />
                   </button>
+                  <PageJump page={currentPage} totalPages={totalPages} onGo={handlePageChange} />
                 </nav>
               </div>
             </div>

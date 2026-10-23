@@ -1,3 +1,4 @@
+import PageJump from '../../../components/PageJump';
 import { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import telecallersApi from '../../services/api/telecallersApi';
@@ -654,6 +655,7 @@ const MoveLeads = () => {
                             >
                                 Next
                             </button>
+                            <PageJump page={currentPage} totalPages={pagination.last_page} onGo={setCurrentPage} />
                         </div>
                     </div>
                 )}

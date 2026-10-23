@@ -1,3 +1,4 @@
+import PageJump from '../../components/PageJump';
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useSearchParams } from '@teleadmin/router';
@@ -340,6 +341,7 @@ const PipelineDrivers = () => {
               >
                 <ChevronRight className="w-4 h-4" />
               </button>
+              <PageJump page={page} totalPages={(pagination.last_page || 1)} onGo={setPage} />
             </div>
           </div>
         )}

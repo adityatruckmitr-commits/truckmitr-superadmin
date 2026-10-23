@@ -29,6 +29,7 @@ import {
   Phone,
   HelpCircle
 } from 'lucide-react';
+import PageJump from '../../components/PageJump';
 
 export default function DriverFulfillment() {
   // Telemetry & Loading State
@@ -78,35 +79,35 @@ export default function DriverFulfillment() {
 
   // Safe fallback bindings to live API telemetry
   const kpis = telemetry?.kpis || {
-    active_jobs: 67,
-    required_drivers: 356,
-    total_applications: 2248,
-    unique_drivers: 952,
-    jobs_with_apps: 66,
-    jobs_without_apps: 1,
-    payment_pending_standard: 44,
+    active_jobs: 0,
+    required_drivers: 0,
+    total_applications: 0,
+    unique_drivers: 0,
+    jobs_with_apps: 0,
+    jobs_without_apps: 0,
+    payment_pending_standard: 0,
     payment_pending_premium: 0,
     payment_pending_super_premium: 0,
     jobs_posted_today: 0,
-    jobs_posted_7d: 18,
-    jobs_posted_30d: 123,
-    closing_next_7d: 9,
-    closing_next_2d: 1,
+    jobs_posted_7d: 0,
+    jobs_posted_30d: 0,
+    closing_next_7d: 0,
+    closing_next_2d: 0,
   };
 
   const riskData = telemetry?.risk_analysis || {
-    green_jobs: 58,
-    yellow_jobs: 1,
-    red_jobs: 8,
+    green_jobs: 0,
+    yellow_jobs: 0,
+    red_jobs: 0,
   };
 
   const typeSummary = telemetry?.job_type_summary || {
-    Premium: { jobs: 23, required: 67, applied: 807, joined: 0, balance: 67, risk: 3 },
-    Standard: { jobs: 44, required: 289, applied: 1513, joined: 0, balance: 289, risk: 6 },
+    Premium: { jobs: 0, required: 0, applied: 0, joined: 0, balance: 0, risk: 0 },
+    Standard: { jobs: 0, required: 0, applied: 0, joined: 0, balance: 0, risk: 0 },
     'Super Premium': { jobs: 0, required: 0, applied: 0, joined: 0, balance: 0, risk: 0 }
   };
 
-  // Static fallback dataset for Active Jobs if telemetry not yet populated
+  // (unused) old static sample rows
   const defaultActiveJobs = [
     {
       id: 'TMJB01868',
@@ -280,19 +281,18 @@ export default function DriverFulfillment() {
     }
   ];
 
-  const activeJobsData = telemetry?.active_jobs && telemetry.active_jobs.length > 0
-    ? telemetry.active_jobs
-    : defaultActiveJobs;
+  const activeJobsData = telemetry?.active_jobs || [];
 
-  const upcomingDeadlines = telemetry?.upcoming_deadlines && telemetry.upcoming_deadlines.length > 0
-    ? telemetry.upcoming_deadlines
-    : [
-        { id: 'TMJB01868', transporter: 'Satish Vashistha', executive: 'Aayushi Verma', drivers: 2, deadline: '07 Oct 2026', status: 'RED', statusBadge: 'bg-rose-100 text-rose-700 border-rose-200' },
-        { id: 'TMJB01863', transporter: 'Sunil Phogat', executive: 'Chandarbhan', drivers: 2, deadline: '09 Oct 2026', status: 'RED', statusBadge: 'bg-rose-100 text-rose-700 border-rose-200' },
-        { id: 'TMJB01860', transporter: 'Pankaj Nandankar', executive: 'Angad', drivers: 1, deadline: '09 Oct 2026', status: 'RED', statusBadge: 'bg-rose-100 text-rose-700 border-rose-200' },
-        { id: 'TMJB01847', transporter: 'Shyam Sharma', executive: 'Aayushi Verma', drivers: 1, deadline: '10 Oct 2026', status: 'RED', statusBadge: 'bg-rose-100 text-rose-700 border-rose-200' },
-        { id: 'TMJB01815', transporter: 'Somnath Dhuriya', executive: 'Angad', drivers: 5, deadline: '10 Oct 2026', status: 'RED', statusBadge: 'bg-rose-100 text-rose-700 border-rose-200' }
-      ];
+  // Applications per day, last 7 days (from the API)
+  const trend = telemetry?.applications_trend || [];
+  const trendPeak = Math.max(0, ...trend.map(t => t.count));
+  const trendPts = trend.map((t, i) => ({
+    ...t,
+    x: trend.length > 1 ? 40 + (i * 420) / (trend.length - 1) : 250,
+    y: 150 - (t.count / Math.max(1, trendPeak)) * 120,
+    label: new Date(t.date + 'T00:00:00').toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }),
+  }));
+  const upcomingDeadlines = telemetry?.upcoming_deadlines || [];
 
   // Distinct Executives for Dropdown
   const executiveOptions = useMemo(() => {
@@ -1169,7 +1169,7 @@ export default function DriverFulfillment() {
                 {/* Stage 1 */}
                 <polygon fill="url(#funnel1)" points="40,10 320,10 300,50 60,50" />
                 <text fill="#ffffff" fontSize="14" fontWeight="700" textAnchor="middle" x="180" y="35">
-                  {kpis.active_jobs || 67}
+                  {kpis.active_jobs || 0}
                 </text>
                 <path d="M 320 30 L 370 30" stroke="#757684" strokeDasharray="3 3" strokeWidth="1.5" />
                 <text fill="#0d1c2e" fontSize="13" fontWeight="600" x="380" y="34">
@@ -1179,7 +1179,7 @@ export default function DriverFulfillment() {
                 {/* Stage 2 */}
                 <polygon fill="url(#funnel2)" points="62,54 298,54 280,94 80,94" />
                 <text fill="#ffffff" fontSize="14" fontWeight="700" textAnchor="middle" x="180" y="79">
-                  {kpis.required_drivers || 356}
+                  {kpis.required_drivers || 0}
                 </text>
                 <path d="M 298 74 L 370 74" stroke="#757684" strokeDasharray="3 3" strokeWidth="1.5" />
                 <text fill="#0d1c2e" fontSize="13" fontWeight="600" x="380" y="78">
@@ -1189,7 +1189,7 @@ export default function DriverFulfillment() {
                 {/* Stage 3 */}
                 <polygon fill="url(#funnel3)" points="82,98 278,98 258,138 102,138" />
                 <text fill="#ffffff" fontSize="14" fontWeight="700" textAnchor="middle" x="180" y="123">
-                  {kpis.total_applications || 2248}
+                  {kpis.total_applications || 0}
                 </text>
                 <path d="M 278 118 L 370 118" stroke="#757684" strokeDasharray="3 3" strokeWidth="1.5" />
                 <text fill="#0d1c2e" fontSize="13" fontWeight="600" x="380" y="122">
@@ -1199,7 +1199,7 @@ export default function DriverFulfillment() {
                 {/* Stage 4 */}
                 <polygon fill="url(#funnel4)" points="104,142 256,142 236,182 124,182" />
                 <text fill="#ffffff" fontSize="14" fontWeight="700" textAnchor="middle" x="180" y="167">
-                  {kpis.unique_drivers || 952}
+                  {kpis.unique_drivers || 0}
                 </text>
                 <path d="M 256 162 L 370 162" stroke="#757684" strokeDasharray="3 3" strokeWidth="1.5" />
                 <text fill="#0d1c2e" fontSize="13" fontWeight="600" x="380" y="166">
@@ -1209,7 +1209,7 @@ export default function DriverFulfillment() {
                 {/* Stage 5 */}
                 <polygon fill="url(#funnel5)" points="126,186 234,186 216,226 144,226" />
                 <text fill="#ffffff" fontSize="14" fontWeight="700" textAnchor="middle" x="180" y="211">
-                  {Math.round((kpis.total_applications || 2248) * 0.05)}
+                  {kpis.interview_done || 0}
                 </text>
                 <path d="M 234 206 L 370 206" stroke="#757684" strokeDasharray="3 3" strokeWidth="1.5" />
                 <text fill="#0d1c2e" fontSize="13" fontWeight="600" x="380" y="210">
@@ -1219,7 +1219,7 @@ export default function DriverFulfillment() {
                 {/* Stage 6 */}
                 <polygon fill="url(#funnel6)" points="146,230 214,230 200,270 160,270" />
                 <text fill="#ffffff" fontSize="14" fontWeight="700" textAnchor="middle" x="180" y="255">
-                  {Math.round((kpis.total_applications || 2248) * 0.01)}
+                  {kpis.matchmaking_done || 0}
                 </text>
                 <path d="M 214 250 L 370 250" stroke="#757684" strokeDasharray="3 3" strokeWidth="1.5" />
                 <text fill="#0d1c2e" fontSize="13" fontWeight="600" x="380" y="254">
@@ -1255,7 +1255,7 @@ export default function DriverFulfillment() {
               <div>
                 <div className="flex justify-between items-center mb-1.5">
                   <span className="text-xs font-semibold text-slate-600">Active Jobs</span>
-                  <span className="text-sm font-bold text-slate-900 tabular-nums">{kpis.active_jobs || 67}</span>
+                  <span className="text-sm font-bold text-slate-900 tabular-nums">{kpis.active_jobs || 0}</span>
                 </div>
                 <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden border border-slate-200/50">
                   <div className="bg-blue-600 h-full rounded-full" style={{ width: '100%' }}></div>
@@ -1267,7 +1267,7 @@ export default function DriverFulfillment() {
                 <div className="flex justify-between items-center mb-1.5">
                   <span className="text-xs font-semibold text-slate-600">Applications</span>
                   <span className="text-sm font-bold text-slate-900 tabular-nums">
-                    {Number(kpis.total_applications || 2248).toLocaleString()}
+                    {Number(kpis.total_applications || 0).toLocaleString()}
                   </span>
                 </div>
                 <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden border border-slate-200/50">
@@ -1290,7 +1290,7 @@ export default function DriverFulfillment() {
               <div>
                 <div className="flex justify-between items-center mb-1.5">
                   <span className="text-xs font-semibold text-slate-600">Balance</span>
-                  <span className="text-sm font-bold text-slate-900 tabular-nums">{kpis.required_drivers || 356}</span>
+                  <span className="text-sm font-bold text-slate-900 tabular-nums">{kpis.required_drivers || 0}</span>
                 </div>
                 <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden border border-slate-200/50">
                   <div className="bg-cyan-600 h-full rounded-full" style={{ width: '75%' }}></div>
@@ -1309,7 +1309,7 @@ export default function DriverFulfillment() {
                     Recruitment Target Health
                   </span>
                   <span className="text-[11px] text-slate-600">
-                    {kpis.required_drivers || 356} balance positions pending fulfillment
+                    {kpis.required_drivers || 0} balance positions pending fulfillment
                   </span>
                 </div>
               </div>
@@ -1341,7 +1341,7 @@ export default function DriverFulfillment() {
                 </div>
               </div>
               <span className="px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200 font-semibold text-xs">
-                Peak: 154
+                Peak: {trendPeak.toLocaleString()}
               </span>
             </div>
 
@@ -1360,46 +1360,21 @@ export default function DriverFulfillment() {
                 <line stroke="#f1f5f9" strokeDasharray="4 4" strokeWidth="1.5" x1="20" x2="480" y1="30" y2="30" />
                 <line stroke="#f1f5f9" strokeDasharray="4 4" strokeWidth="1.5" x1="20" x2="480" y1="80" y2="80" />
                 <line stroke="#f1f5f9" strokeDasharray="4 4" strokeWidth="1.5" x1="20" x2="480" y1="130" y2="130" />
-                <path
-                  d="M 40 120 L 110 130 L 180 25 L 250 105 L 320 85 L 390 135 L 460 128 L 460 160 L 40 160 Z"
-                  fill="url(#areaGradient)"
-                />
-                <polyline
-                  fill="none"
-                  points="40,120 110,130 180,25 250,105 320,85 390,135 460,128"
-                  stroke="#2563eb"
-                  strokeLinejoin="round"
-                  strokeWidth="2.5"
-                />
-
-                {/* Points */}
-                <circle cx="40" cy="120" fill="#ffffff" r="4" stroke="#2563eb" strokeWidth="2.5" />
-                <text fill="#64748b" fontSize="11" fontWeight="600" textAnchor="middle" x="40" y="110">53</text>
-                <text fill="#94a3b8" fontSize="10" textAnchor="middle" x="40" y="175">01 Oct</text>
-
-                <circle cx="110" cy="130" fill="#ffffff" r="4" stroke="#2563eb" strokeWidth="2.5" />
-                <text fill="#64748b" fontSize="11" fontWeight="600" textAnchor="middle" x="110" y="122">45</text>
-                <text fill="#94a3b8" fontSize="10" textAnchor="middle" x="110" y="175">02 Oct</text>
-
-                <circle cx="180" cy="25" fill="#1e40af" r="5" stroke="#ffffff" strokeWidth="2" />
-                <text fill="#1e40af" fontSize="12" fontWeight="700" textAnchor="middle" x="180" y="15">154</text>
-                <text fill="#94a3b8" fontSize="10" textAnchor="middle" x="180" y="175">03 Oct</text>
-
-                <circle cx="250" cy="105" fill="#ffffff" r="4" stroke="#2563eb" strokeWidth="2.5" />
-                <text fill="#64748b" fontSize="11" fontWeight="600" textAnchor="middle" x="250" y="97">68</text>
-                <text fill="#94a3b8" fontSize="10" textAnchor="middle" x="250" y="175">04 Oct</text>
-
-                <circle cx="320" cy="85" fill="#ffffff" r="4" stroke="#2563eb" strokeWidth="2.5" />
-                <text fill="#64748b" fontSize="11" fontWeight="600" textAnchor="middle" x="320" y="77">85</text>
-                <text fill="#94a3b8" fontSize="10" textAnchor="middle" x="320" y="175">05 Oct</text>
-
-                <circle cx="390" cy="135" fill="#ffffff" r="4" stroke="#2563eb" strokeWidth="2.5" />
-                <text fill="#64748b" fontSize="11" fontWeight="600" textAnchor="middle" x="390" y="127">39</text>
-                <text fill="#94a3b8" fontSize="10" textAnchor="middle" x="390" y="175">06 Oct</text>
-
-                <circle cx="460" cy="128" fill="#ffffff" r="4" stroke="#2563eb" strokeWidth="2.5" />
-                <text fill="#64748b" fontSize="11" fontWeight="600" textAnchor="middle" x="460" y="120">45</text>
-                <text fill="#94a3b8" fontSize="10" textAnchor="middle" x="460" y="175">07 Oct</text>
+                {trend.length > 1 && (
+                  <>
+                    <path d={`M ${trendPts.map(p => `${p.x} ${p.y}`).join(' L ')} L 460 160 L 40 160 Z`} fill="url(#areaGradient)" />
+                    <polyline fill="none" points={trendPts.map(p => `${p.x},${p.y}`).join(' ')} stroke="#2563eb" strokeLinejoin="round" strokeWidth="2.5" />
+                  </>
+                )}
+                {trendPts.map((p, i) => (
+                  <g key={p.date}>
+                    <circle cx={p.x} cy={p.y} fill="#ffffff" r="4" stroke="#2563eb" strokeWidth="2.5">
+                      <title>{`${p.label}: ${p.count} applications`}</title>
+                    </circle>
+                    <text fill="#64748b" fontSize="11" fontWeight="600" textAnchor="middle" x={p.x} y={p.y - 9}>{p.count}</text>
+                    <text fill="#94a3b8" fontSize="10" textAnchor="middle" x={p.x} y="175">{p.label}</text>
+                  </g>
+                ))}
               </svg>
             </div>
           </div>
@@ -1429,50 +1404,21 @@ export default function DriverFulfillment() {
               <div className="relative w-36 h-36 flex items-center justify-center shrink-0">
                 <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
                   <circle cx="18" cy="18" fill="transparent" r="14" stroke="#f1f5f9" strokeWidth="4" />
+                  {/* share of active jobs that have applications (the legend counts overlap, so no pie split) */}
                   <circle
                     cx="18"
                     cy="18"
                     fill="transparent"
                     r="14"
                     stroke="#10b981"
-                    strokeDasharray="52.8 88"
+                    strokeDasharray={`${kpis.active_jobs ? ((kpis.jobs_with_apps || 0) / kpis.active_jobs) * 88 : 0} 88`}
                     strokeDashoffset="0"
-                    strokeWidth="4"
-                  />
-                  <circle
-                    cx="18"
-                    cy="18"
-                    fill="transparent"
-                    r="14"
-                    stroke="#2563eb"
-                    strokeDasharray="19.36 88"
-                    strokeDashoffset="-52.8"
-                    strokeWidth="4"
-                  />
-                  <circle
-                    cx="18"
-                    cy="18"
-                    fill="transparent"
-                    r="14"
-                    stroke="#f59e0b"
-                    strokeDasharray="13.2 88"
-                    strokeDashoffset="-72.16"
-                    strokeWidth="4"
-                  />
-                  <circle
-                    cx="18"
-                    cy="18"
-                    fill="transparent"
-                    r="14"
-                    stroke="#ef4444"
-                    strokeDasharray="2.64 88"
-                    strokeDashoffset="-85.36"
                     strokeWidth="4"
                   />
                 </svg>
                 <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
                   <span className="text-2xl font-extrabold text-slate-900 tabular-nums leading-tight">
-                    {kpis.active_jobs || 67}
+                    {kpis.active_jobs || 0}
                   </span>
                   <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
                     TOTAL JOBS
@@ -1488,7 +1434,7 @@ export default function DriverFulfillment() {
                     <span className="text-xs font-semibold text-slate-700">Active Hiring</span>
                   </div>
                   <span className="text-xs font-bold text-slate-900 tabular-nums">
-                    {kpis.jobs_with_apps || 66} Jobs
+                    {kpis.jobs_with_apps || 0} Jobs
                   </span>
                 </div>
                 <div className="flex items-center justify-between sm:justify-start gap-6 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200/60">
@@ -1497,7 +1443,7 @@ export default function DriverFulfillment() {
                     <span className="text-xs font-semibold text-slate-700">Standard Tier</span>
                   </div>
                   <span className="text-xs font-bold text-slate-900 tabular-nums">
-                    {kpis.payment_pending_standard || 44} Jobs
+                    {kpis.payment_pending_standard || 0} Jobs
                   </span>
                 </div>
                 <div className="flex items-center justify-between sm:justify-start gap-6 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200/60">
@@ -1506,7 +1452,7 @@ export default function DriverFulfillment() {
                     <span className="text-xs font-semibold text-slate-700">Closing This Week</span>
                   </div>
                   <span className="text-xs font-bold text-slate-900 tabular-nums">
-                    {kpis.closing_next_7d || 9} Jobs
+                    {kpis.closing_next_7d || 0} Jobs
                   </span>
                 </div>
                 <div className="flex items-center justify-between sm:justify-start gap-6 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200/60">
@@ -1515,7 +1461,7 @@ export default function DriverFulfillment() {
                     <span className="text-xs font-semibold text-slate-700">Urgent (2 Days)</span>
                   </div>
                   <span className="text-xs font-bold text-rose-600 tabular-nums">
-                    {kpis.closing_next_2d || 1} Job
+                    {kpis.closing_next_2d || 0} Jobs
                   </span>
                 </div>
               </div>
@@ -1701,6 +1647,7 @@ export default function DriverFulfillment() {
             >
               ›
             </button>
+            <PageJump page={currentPage} totalPages={totalPages} onGo={setCurrentPage} />
           </div>
         </div>
       </div>

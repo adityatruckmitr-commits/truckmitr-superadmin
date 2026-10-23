@@ -1,3 +1,4 @@
+import PageJump from '../../components/PageJump';
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Search, Filter, Loader2, Calendar, MapPin, Truck, Phone, Briefcase, FileText, IndianRupee, ShieldCheck, X, Play, Clock, User, Users, PhoneCall, PhoneMissed } from 'lucide-react-teleadmin';
@@ -400,6 +401,7 @@ const DriverBank = () => {
                         >
                             Next
                         </button>
+                        <PageJump page={page} totalPages={totalPages} onGo={setPage} />
                     </div>
                 )}
             </div>

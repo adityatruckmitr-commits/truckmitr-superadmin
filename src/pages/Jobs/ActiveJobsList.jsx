@@ -29,6 +29,7 @@ import {
   ShieldCheck,
   ExternalLink
 } from 'lucide-react';
+import PageJump from '../../components/PageJump';
 
 export default function ActiveJobsList() {
   const navigate = useNavigate();
@@ -42,7 +43,7 @@ export default function ActiveJobsList() {
 
   // Table Controls & Filters
   const [searchQuery, setSearchQuery] = useState('');
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(20);
   const [currentPage, setCurrentPage] = useState(1);
   const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
 
@@ -470,44 +471,44 @@ export default function ActiveJobsList() {
     try {
       setIsRefreshing(true);
       const res = await api.get('/admin/jobs-brief', {
-        params: { status: 'active', per_page: 50 }
+        params: { status: 'active', per_page: 500 } // all active jobs: this page filters and pages them in the browser
       });
-      if (res.data && res.data.status === 'success' && Array.isArray(res.data.data) && res.data.data.length > 0) {
+      if (res.data && res.data.status === 'success' && Array.isArray(res.data.data)) {
         const liveRows = res.data.data.map((j, idx) => ({
           id: j.id || idx + 1,
-          job_id: j.job_id || `TMJB0${1890 + idx}`,
-          tmid: j.tmid || `TM2609TR${400000 + idx}`,
-          assigned_to: j.assigned_to || 'Angad',
+          job_id: j.job_id || '—',
+          tmid: j.tmid || '—',
+          assigned_to: j.assigned_to || 'Unassigned',
           assigned_initials: (j.assigned_to || 'TM').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase(),
           assigned_bg: idx % 3 === 0 ? 'bg-indigo-100 text-indigo-700' : idx % 3 === 1 ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700',
-          contact_name: j.contact_name || 'Transporter Partner',
-          mobile: j.mobile || '9876543210',
-          title: j.title || 'Heavy Commercial Truck Driver',
+          contact_name: j.contact_name || '—',
+          mobile: j.mobile || '—',
+          title: j.title || '—',
           compensation_tags: [
-            { text: `💰 ${j.compensation || '₹25,000'}`, bg: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+            { text: `💰 ${j.compensation || '—'}`, bg: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
             { text: '+ ट्रिप इंसेंटिव', bg: 'bg-blue-50 text-blue-700 border-blue-200' }
           ],
-          vehicle_type: j.vehicle_type || 'Container Trucks',
+          vehicle_type: j.vehicle_type || '—',
           vehicle_badge: 'bg-indigo-50 text-indigo-700 border-indigo-200',
-          license: j.license || 'HMV',
-          location: j.location || 'Delhi NCR',
+          license: j.license || '—',
+          location: j.location || '—',
           description: j.description ? (j.description.slice(0, 30) + '...') : 'अनुभवी ड्राइवर की आवश्यकता...',
-          full_description: j.description || 'Experienced commercial truck driver needed immediately.',
-          experience: j.experience || '1 – 5 Yrs',
+          full_description: j.description || '—',
+          experience: j.experience || '—',
           skills: Array.isArray(j.skills) ? j.skills : ['E-commerce'],
           openings: j.drivers_req || 2,
-          posted_date: j.posted_at || 'Recently',
-          expiry_date: `Exp: ${j.deadline || '31 Oct 2026'}`,
+          posted_date: j.posted_at || '—',
+          expiry_date: `Exp: ${j.deadline || '—'}`,
           status: 'Approved',
           apps_count: j.apps_count || 0,
           applications: []
         }));
         setJobs(liveRows);
       } else {
-        setJobs(activeJobsData);
+        setJobs([]);
       }
     } catch {
-      setJobs(activeJobsData);
+      setJobs([]);
     } finally {
       setLoading(false);
       setIsRefreshing(false);
@@ -552,7 +553,7 @@ export default function ActiveJobsList() {
   }, [jobs, searchQuery, selectedVehicleType, selectedLicense, selectedState, selectedTelecaller]);
 
   // Pagination calculation
-  const totalEntries = jobs.length || 70;
+  const totalEntries = jobs.length;
   const totalFiltered = filteredJobs.length;
   const totalPages = Math.ceil(totalFiltered / pageSize) || 1;
   
@@ -796,6 +797,7 @@ export default function ActiveJobsList() {
             className="rounded-md border border-slate-300 py-1.5 px-2 text-sm font-medium focus:ring-blue-500 focus:border-blue-500 shadow-xs bg-white cursor-pointer"
           >
             <option value={10}>10</option>
+            <option value={20}>20</option>
             <option value={25}>25</option>
             <option value={50}>50</option>
             <option value={100}>100</option>
@@ -1084,6 +1086,7 @@ export default function ActiveJobsList() {
               <span className="sr-only">Next</span>
               Next
             </button>
+            <PageJump page={currentPage} totalPages={totalPages} onGo={setCurrentPage} />
           </nav>
         </div>
         {/* END: Table Pagination Footer */}

@@ -18,6 +18,7 @@ import {
   RefreshCw,
   ExternalLink
 } from 'lucide-react';
+import PageJump from '../../components/PageJump';
 
 const TAB_CONFIGS = {
   budget: {
@@ -157,7 +158,7 @@ export default function OEMFilterHub() {
   const [submitting, setSubmitting] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(20);
   const [currentPage, setCurrentPage] = useState(1);
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
 
@@ -639,6 +640,7 @@ export default function OEMFilterHub() {
                   className="text-xs py-1 px-2 border border-slate-300 rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white font-semibold text-slate-700"
                 >
                   <option value={10}>10</option>
+                  <option value={20}>20</option>
                   <option value={25}>25</option>
                   <option value={50}>50</option>
                   <option value={100}>100</option>
@@ -768,6 +770,7 @@ export default function OEMFilterHub() {
               >
                 Next
               </button>
+              <PageJump page={currentPage} totalPages={totalPages} onGo={setCurrentPage} />
             </div>
           </div>
         </div>

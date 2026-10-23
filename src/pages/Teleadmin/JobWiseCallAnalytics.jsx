@@ -116,7 +116,7 @@ export default function JobWiseCallAnalytics() {
             revenueStatus: isConnected ? '₹499 TRUSTED CAPTURED' : 'UNPAID / REGISTERED',
             verifiedExpiry: '12 Oct 2027',
             remarks: isConnected
-              ? `Connected via Ext ${c.extension_no || '101'}. Driver verified active commercial driving profile.`
+              ? `Connected via Ext ${c.extension_no || '—'}. Driver verified active commercial driving profile.`
               : `Call attempted by ${c.agent_name || 'Telechamp'} via extension ${c.extension_no || '--'}. Call missed/not answered.`
           };
         });

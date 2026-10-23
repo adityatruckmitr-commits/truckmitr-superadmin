@@ -1,3 +1,4 @@
+import PageJump from '../../components/PageJump';
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Camera, LogIn, LogOut, Clock, CheckCircle, XCircle, User, ArrowUpDown, X, Download, Upload, FileText } from 'lucide-react-teleadmin'
@@ -1065,6 +1066,7 @@ setIsExporting(false)
                     >
                       Next
                     </button>
+                    <PageJump page={currentPage} totalPages={pagination.last_page} onGo={setCurrentPage} />
                   </div>
                 </div>
               )}

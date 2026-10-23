@@ -1,3 +1,4 @@
+import PageJump from '../../../../components/PageJump';
 import { useState } from 'react';
 import { X, Search, User, Phone, Mail, MapPin, Calendar, CreditCard, CheckCircle } from 'lucide-react-teleadmin';
 import telecallersApi from '../../../services/api/telecallersApi';
@@ -152,6 +153,7 @@ const PaymentSearchModal = ({ onClose }) => {
                             >
                                 Next
                             </button>
+                            <PageJump page={currentPage} totalPages={pagination.last_page} onGo={handlePageChange} />
                         </div>
                     )}
                 </>
